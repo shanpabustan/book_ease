@@ -26,13 +26,14 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
+          bool isWideScreen = constraints.maxWidth > 600;
           return Center(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                padding: EdgeInsets.symmetric(horizontal: isWideScreen ? 100 : 30.0),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: constraints.maxWidth * 0.9,
+                    maxWidth: isWideScreen ? 500 : constraints.maxWidth * 0.9,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -42,7 +43,7 @@ class LoginScreen extends StatelessWidget {
                       const SizedBox(height: 40),
                       Image.asset(
                         'assets/logo-removebg-preview.png',
-                        height: constraints.maxWidth > 600 ? 200 : 150,
+                        height: isWideScreen ? 220 : 150,
                       ),
                       const SizedBox(height: 30),
                       TextField(
@@ -51,7 +52,7 @@ class LoginScreen extends StatelessWidget {
                           FilteringTextInputFormatter.allow(RegExp(r'^[0-9-]+$')),
                         ],
                         decoration: InputDecoration(
-                          labelText: 'Student ID Number',
+                          labelText: 'ID Number',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -67,34 +68,34 @@ class LoginScreen extends StatelessWidget {
                           child: const Text('Forgot password?'),
                         ),
                       ),
-                        const SizedBox(height: 10),
-                        SizedBox(
+                      const SizedBox(height: 10),
+                      SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                            builder: (context) => const UserDashApp(),
-                            ),
-                          );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const UserDashApp(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                            backgroundColor: Colors.teal,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                           child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Text(
-                            'Login',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              'Login',
+                              style: TextStyle(fontSize: 16, color: Colors.white),
+                            ),
                           ),
                         ),
-                        ),
-                        const SizedBox(height: 20),
+                      ),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
