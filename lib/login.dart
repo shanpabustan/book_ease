@@ -51,9 +51,23 @@ class LoginScreen extends StatelessWidget {
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp(r'^[0-9-]+$')),
                         ],
+                        style: const TextStyle(
+                            color: Color.fromARGB(
+                                255, 6, 6, 6)), // ✅ Change text color to teal
                         decoration: InputDecoration(
                           labelText: 'ID Number',
+                          labelStyle: const TextStyle(
+                              color: Colors.grey), // Default label color
+                          floatingLabelStyle: const TextStyle(
+                              color:
+                                  Colors.teal), // Label turns teal when typing
                           border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.teal,
+                                width: 2), 
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
@@ -62,10 +76,14 @@ class LoginScreen extends StatelessWidget {
                       const PasswordField(),
                       const SizedBox(height: 10),
                       Align(
-                        alignment: Alignment.center,
+                        alignment: Alignment.centerRight, 
                         child: TextButton(
                           onPressed: () {},
-                          child: const Text('Forgot password?'),
+                          child: const Text(
+                            'Forgot password?',
+                            style: TextStyle(
+                                color: Colors.black), 
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -79,12 +97,14 @@ class LoginScreen extends StatelessWidget {
                                 builder: (context) => const UserDashApp(),
                               ),
                             );
+                            
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            
                           ),
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 12),
@@ -95,6 +115,7 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -139,14 +160,26 @@ class PasswordFieldState extends State<PasswordField> {
   Widget build(BuildContext context) {
     return TextField(
       obscureText: isObscured,
+      cursorColor: Colors.teal, 
+      style: const TextStyle(
+          color: Color.fromARGB(255, 6, 6, 6)), // Text color while typing
       decoration: InputDecoration(
         labelText: 'Password',
+        labelStyle: const TextStyle(color: Colors.grey), // Default label color
+        floatingLabelStyle: const TextStyle(
+            color: Colors.teal), // Label turns teal when focused
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(
+              color: Colors.teal, width: 2), // Border turns teal when focused
           borderRadius: BorderRadius.circular(10),
         ),
         suffixIcon: IconButton(
           icon: Icon(
             isObscured ? Icons.visibility : Icons.visibility_off,
+            color: Colors.teal, // Visibility icon color
           ),
           onPressed: () {
             setState(() {
