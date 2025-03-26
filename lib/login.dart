@@ -25,97 +25,86 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          bool isWideScreen =
-              constraints.maxWidth > 1000; // Detect large screens
-
-          return Container(
-            height: MediaQuery.of(context).size.height, // Full height
-            width: double.infinity, // Full width
-            child: isWideScreen
-                ? Row(
-                    children: [
-                      // Left Side: Logo with Full Teal Background
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          color: Colors.teal, // Left side background color
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            'assets/images/logo-removebg-preview.png',
-                            width: constraints.maxWidth > 1200 ? 500 : 350,
-                            height: constraints.maxWidth > 1200 ? 500 : 350,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-
-                      // Right Side: Login Form (No Background Color)
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 50, // Top padding
-                            left: 50, // Left padding
-                            right: 50, // Right padding
-                          ),
-                          child: _buildLoginForm(context, isWideScreen),
-                        ),
-                      ),
-                    ],
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+      body: SingleChildScrollView(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            bool isWideScreen = constraints.maxWidth > 1000;
+            return SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: double.infinity,
+              child: isWideScreen
+                  ? Row(
                       children: [
-                        const SizedBox(height: 60),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              bottom: 20), // Bottom padding
-                          child: Image.asset(
-                            'assets/images/logo-removebg-preview.png',
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            color: Colors.teal,
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              'assets/images/logo-removebg-preview.png',
+                              width: constraints.maxWidth > 1200 ? 500 : 350,
+                              height: constraints.maxWidth > 1200 ? 500 : 350,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        _buildLoginForm(context, isWideScreen),
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 50, left: 50, right: 50),
+                            child: _buildLoginForm(context, isWideScreen),
+                          ),
+                        ),
                       ],
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 60),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Image.asset(
+                              'assets/images/logo-removebg-preview.png',
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          _buildLoginForm(context, isWideScreen),
+                        ],
+                      ),
                     ),
-                  ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
-  /// Login Form Widget with **WELCOME BACK ADMIN!** Condition
   Widget _buildLoginForm(BuildContext context, bool isWideScreen) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ✅ Display only if screen is wider than 1000px
           if (isWideScreen)
             const Padding(
               padding: EdgeInsets.only(bottom: 40),
               child: Text(
                 "WELCOME BACK ADMIN!",
                 style: TextStyle(
-                  fontSize: 30, // Slightly larger text
-                  fontWeight: FontWeight.bold, // Bold text
-                  color: Colors.teal, // Teal color
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
                   fontFamily: 'Poppins',
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
-
           TextField(
             keyboardType: TextInputType.number,
             inputFormatters: [
@@ -152,7 +141,6 @@ class LoginScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 shape: RoundedRectangleBorder(
@@ -166,6 +154,14 @@ class LoginScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserDashApp(),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 20),
@@ -192,10 +188,8 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-/// **PasswordField Widget**
 class PasswordField extends StatefulWidget {
   const PasswordField({super.key});
-
   @override
   _PasswordFieldState createState() => _PasswordFieldState();
 }
