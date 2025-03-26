@@ -19,7 +19,19 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo.png
-    - assets/logo-removebg-preview.png
-    - assets/banner.jpg
-    - assets/percy-book.jpg
+    - assets/images/logo.png
+    - assets/images/logo-removebg-preview.png
+    - assets/images/banner.jpg
+    - assets/images/percy-book.jpg
+
+# flutter:
+#   fonts:
+#     - family: Poppins
+#       fonts:
+#         - asset: assets/fonts/Poppins-Regular.ttf
+#         - asset: assets/fonts/Poppins-Bold.ttf
+#           weight: 700
+
+         
+
+        
