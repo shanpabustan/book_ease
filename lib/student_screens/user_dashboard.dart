@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'User_Nav.dart';
+import 'user_nav.dart';
 
 void main() {
   runApp(const UserDashApp());
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 image: const DecorationImage(
-                  image: AssetImage('assets/banner.jpg'),
+                  image: AssetImage('assets/images/banner.jpg'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -72,9 +72,11 @@ class HomeScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildCategoryIcon(context, Icons.computer_rounded, 'Technology'),
+                  _buildCategoryIcon(
+                      context, Icons.computer_rounded, 'Technology'),
                   _buildCategoryIcon(context, Icons.shape_line, 'Mathematics'),
-                  _buildCategoryIcon(context, Icons.healing_rounded, 'Psychology'),
+                  _buildCategoryIcon(
+                      context, Icons.healing_rounded, 'Psychology'),
                   _buildCategoryIcon(context, Icons.scale, 'Physics'),
                   _buildCategoryIcon(context, Icons.science_sharp, 'Chemistry'),
                 ],
@@ -148,7 +150,7 @@ class HomeScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     image: const DecorationImage(
-                      image: AssetImage('assets/percy-book.jpg'),
+                      image: AssetImage('assets/images/percy-book.jpg'),
                       fit: BoxFit.cover,
                     ),
                   ),
