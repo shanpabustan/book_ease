@@ -9,6 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # cupertino_icons: ^1.0.2
+  google_fonts: ^6.2.1
+  google_nav_bar: ^5.0.7
+  line_icons: ^2.0.3
     
 
 dev_dependencies:
@@ -23,14 +28,18 @@ flutter:
     - assets/images/logo-removebg-preview.png
     - assets/images/banner.jpg
     - assets/images/percy-book.jpg
+    - assets/images/admin_logo.png
 
 # flutter:
-#   fonts:
-#     - family: Poppins
-#       fonts:
-#         - asset: assets/fonts/Poppins-Regular.ttf
-#         - asset: assets/fonts/Poppins-Bold.ttf
-#           weight: 700
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800
+
 
          
 

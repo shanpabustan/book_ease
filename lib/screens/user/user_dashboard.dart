@@ -1,18 +1,47 @@
 import 'package:flutter/material.dart';
-import 'user_nav.dart';
+import 'package:book_ease/screens/user/user_nav.dart';
+import 'package:book_ease/screens/user/library_screen.dart';
+import 'package:book_ease/screens/user/mybooks_screen.dart';
+import 'package:book_ease/screens/user/profile_screen.dart';
 
 void main() {
   runApp(const UserDashApp());
 }
 
-class UserDashApp extends StatelessWidget {
+class UserDashApp extends StatefulWidget {
   const UserDashApp({super.key});
+
+  @override
+  _UserDashAppState createState() => _UserDashAppState();
+}
+
+class _UserDashAppState extends State<UserDashApp> {
+  int _selectedIndex = 0; // Track selected tab
+
+  final List<Widget> _pages = [
+    const HomeScreen(),
+    const LibraryScreen(),
+    const MyBooksScreen(),
+    const ProfileScreen(),
+  ];
+
+  void _onTabChange(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
+      home: Scaffold(
+        body: _pages[_selectedIndex], // Display selected page
+        bottomNavigationBar: NavigationBarWidget(
+          selectedIndex: _selectedIndex,
+          onTabChange: _onTabChange,
+        ),
+      ),
     );
   }
 }
@@ -74,11 +103,10 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _buildCategoryIcon(
                       context, Icons.computer_rounded, 'Technology'),
-                  _buildCategoryIcon(context, Icons.shape_line, 'Mathematics'),
-                  _buildCategoryIcon(
-                      context, Icons.healing_rounded, 'Psychology'),
-                  _buildCategoryIcon(context, Icons.scale, 'Physics'),
-                  _buildCategoryIcon(context, Icons.science_sharp, 'Chemistry'),
+                  _buildCategoryIcon(context, Icons.calculate, 'Mathematics'),
+                  _buildCategoryIcon(context, Icons.psychology, 'Psychology'),
+                  _buildCategoryIcon(context, Icons.balance, 'Physics'),
+                  _buildCategoryIcon(context, Icons.science, 'Chemistry'),
                 ],
               ),
             ),
@@ -90,7 +118,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBarWidget(),
     );
   }
 

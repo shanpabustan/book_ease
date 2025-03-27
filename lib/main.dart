@@ -1,5 +1,7 @@
-import 'package:book_ease/login.dart';
 import 'package:flutter/material.dart';
+// import 'package:book_ease/screens/auth/additional_signup.dart';
+import 'package:book_ease/screens/auth/login.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MainApp());
@@ -11,9 +13,12 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const BookEaseApp(), // Set UserLogin as the initial screen
+      title: 'BookEase',
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+        textTheme: GoogleFonts.poppinsTextTheme(), // Apply Poppins globally
+      ),
+      home: const LogBookEaseApp(),
     );
   }
 }
