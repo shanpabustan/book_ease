@@ -20,24 +20,24 @@ class MyBooksScreen extends StatelessWidget {
         ),
       ),
     );
-  }
+  } 
 
   // Function to handle navigation
   // ignore: unused_element
-  void _navigateToScreen(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/library');
-        break;
-      case 2:
-        // Already on My Books, do nothing
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-    }
-  }
+  // void _navigateToScreen(BuildContext context, int index) {
+  //   switch (index) {
+  //     case 0:
+  //       Navigator.pushReplacementNamed(context, '/home');
+  //       break;
+  //     case 1:
+  //       Navigator.pushReplacementNamed(context, '/library');
+  //       break;
+  //     case 2:
+  //       // Already on My Books, do nothing
+  //       break;
+  //     case 3:
+  //       Navigator.pushReplacementNamed(context, '/profile');
+  //       break;
+  //   }
+  // }
 }
