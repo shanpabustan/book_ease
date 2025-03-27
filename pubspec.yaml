@@ -29,6 +29,7 @@ flutter:
     - assets/images/banner.jpg
     - assets/images/percy-book.jpg
     - assets/images/admin_logo.png
+    - assets/images/lord_p.png
 
 # flutter:
   fonts:
