@@ -11,8 +11,9 @@ dependencies:
     sdk: flutter
 
   # cupertino_icons: ^1.0.2
-  google_fonts: ^6.2.1
+  google_fonts: ^6.1.0
   google_nav_bar: ^5.0.7
+  image_picker: ^1.0.7
   line_icons: ^2.0.3
 
 dev_dependencies:
@@ -35,6 +36,7 @@ flutter:
     - assets/images/percy-book.jpg
     - assets/images/admin_logo.png
     - assets/images/lord_p.png
+    - assets/images/harry-book.jpg
 
   fonts:
     - family: Poppins

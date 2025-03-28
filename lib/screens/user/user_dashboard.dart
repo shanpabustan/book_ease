@@ -3,6 +3,7 @@ import 'package:book_ease/screens/user/user_nav.dart';
 import 'package:book_ease/screens/user/library_screen.dart';
 import 'package:book_ease/screens/user/mybooks_screen.dart';
 import 'package:book_ease/screens/user/profile_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const UserDashApp());
@@ -16,7 +17,7 @@ class UserDashApp extends StatefulWidget {
 }
 
 class _UserDashAppState extends State<UserDashApp> {
-  int _selectedIndex = 0; // Track selected tab
+  int _selectedIndex = 0;
 
   final List<Widget> _pages = [
     const HomeScreen(),
@@ -36,7 +37,7 @@ class _UserDashAppState extends State<UserDashApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: _pages[_selectedIndex], // Display selected page
+        body: _pages[_selectedIndex],
         bottomNavigationBar: NavigationBarWidget(
           selectedIndex: _selectedIndex,
           onTabChange: _onTabChange,
@@ -46,6 +47,7 @@ class _UserDashAppState extends State<UserDashApp> {
   }
 }
 
+// ===================== Home Screen =====================
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -54,21 +56,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: Container(
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search for books...',
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-            ),
-          ),
-        ),
+        title: _buildSearchBar(),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications, color: Colors.white),
@@ -81,47 +69,84 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Explore Library Books',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              height: 180,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/banner.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            _buildSectionTitle('Explore Library Books'),
+            _buildBanner(),
             const SizedBox(height: 25),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildCategoryIcon(
-                      context, Icons.computer_rounded, 'Technology'),
-                  _buildCategoryIcon(context, Icons.calculate, 'Mathematics'),
-                  _buildCategoryIcon(context, Icons.psychology, 'Psychology'),
-                  _buildCategoryIcon(context, Icons.balance, 'Physics'),
-                  _buildCategoryIcon(context, Icons.science, 'Chemistry'),
-                ],
-              ),
-            ),
+            _buildCategoryIcons(),
             const SizedBox(height: 10),
-            _buildSectionTitle(context, 'Recommendations'),
-            _buildBookList(),
-            _buildSectionTitle(context, 'Borrowed Books'),
-            _buildBookList(),
+            _buildBookSection(context, 'Recommendations'),
+            _buildBookSection(context, 'Trending Books'),
+            _buildBookSection(context, 'Borrowed Books'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryIcon(BuildContext context, IconData icon, String label) {
+  // ===================== UI Components =====================
+  Widget _buildSearchBar() {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Search for books...',
+          hintStyle: GoogleFonts.poppins(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildBanner() {
+    return Container(
+      height: 180,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/banner.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryIcons() {
+    final List<Map<String, dynamic>> categories = [
+      {"icon": Icons.computer_rounded, "label": "Technology"},
+      {"icon": Icons.calculate, "label": "Mathematics"},
+      {"icon": Icons.psychology, "label": "Psychology"},
+      {"icon": Icons.balance, "label": "Physics"},
+      {"icon": Icons.science, "label": "Chemistry"},
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories
+            .map((cat) => _buildCategoryIcon(
+                cat["icon"] as IconData, cat["label"] as String))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildCategoryIcon(IconData icon, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
@@ -130,9 +155,7 @@ class HomeScreen extends StatelessWidget {
           FittedBox(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.03,
-              ),
+              style: GoogleFonts.poppins(fontSize: 12),
             ),
           ),
         ],
@@ -140,7 +163,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _buildBookSection(BuildContext context, String category) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, category),
+        _buildBookList(category),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -148,56 +181,169 @@ class HomeScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style:
+                GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           TextButton(
-            onPressed: () {},
-            child: const Text('See All', style: TextStyle(color: Colors.teal)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SeeAllScreen(category: title),
+                ),
+              );
+            },
+            child: Text(
+              'See All',
+              style: GoogleFonts.poppins(color: Colors.teal),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBookList() {
+  Widget _buildBookList(String category) {
+    final books = _getBooks(category);
+
     return SizedBox(
       height: 150,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 5,
+        itemCount: books.length,
         itemBuilder: (context, index) {
-          return Container(
-            width: 100,
-            margin: const EdgeInsets.only(right: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/percy-book.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Book Title',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Text(
-                  '5 copies available',
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
-                ),
-              ],
-            ),
+          final book = books[index];
+          return _buildBookTile(
+            book["title"]!,
+            book["copies"]!,
+            book["image"]!, // ✅ Pass image path
           );
         },
       ),
+    );
+  }
+
+  Widget _buildBookTile(String title, String copies, String imagePath) {
+    return Container(
+      width: 100,
+      margin: const EdgeInsets.only(right: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              image: DecorationImage(
+                image: AssetImage(imagePath), // ✅ Use dynamic image path
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            style:
+                GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            copies,
+            style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Map<String, String>> _getBooks(String category) {
+    switch (category) {
+      case "Recommendations":
+        return [
+          {
+            "title": "Percy Jackson",
+            "copies": "5 copies available",
+            "image": "assets/images/percy-book.jpg"
+          },
+          {
+            "title": "Harry Potter",
+            "copies": "3 copies available",
+            "image": "assets/images/harry-book.jpg"
+          },
+          {
+            "title": "Percy Jackson",
+            "copies": "5 copies available",
+            "image": "assets/images/percy-book.jpg"
+          },
+          {
+            "title": "Harry Potter",
+            "copies": "3 copies available",
+            "image": "assets/images/harry-book.jpg"
+          },
+        ];
+      case "Trending Books":
+        return [
+          {
+            "title": "The Alchemist",
+            "copies": "7 copies available",
+            "image": "assets/images/harry-book.jpg"
+          },
+          {
+            "title": "Atomic Habits",
+            "copies": "6 copies available",
+            "image": "assets/images/percy-book.jpg"
+          },
+          {
+            "title": "The Alchemist",
+            "copies": "7 copies available",
+            "image": "assets/images/harry-book.jpg"
+          },
+          {
+            "title": "Atomic Habits",
+            "copies": "6 copies available",
+            "image": "assets/images/percy-book.jpg"
+          },
+        ];
+      case "Borrowed Books":
+        return [
+          {
+            "title": "1984",
+            "copies": "2 copies left",
+            "image": "assets/images/percy-book.jpg"
+          },
+          {
+            "title": "The Hobbit",
+            "copies": "1 copy left",
+            "image": "assets/images/harry-book.jpg"
+          },
+          {
+            "title": "1984",
+            "copies": "2 copies left",
+            "image": "assets/images/percy-book.jpg"
+          },
+          {
+            "title": "The Hobbit",
+            "copies": "1 copy left",
+            "image": "assets/images/harry-book.jpg"
+          },
+        ];
+      default:
+        return [];
+    }
+  }
+}
+
+// ===================== See All Screen =====================
+class SeeAllScreen extends StatelessWidget {
+  final String category;
+  const SeeAllScreen({super.key, required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(category)),
+      body: Center(child: Text('Display all books for $category')),
     );
   }
 }
