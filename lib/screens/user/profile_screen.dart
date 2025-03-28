@@ -5,25 +5,32 @@ import 'package:book_ease/screens/user/user_nav.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-   @override
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'My Profile',
-          style: TextStyle(
-            fontSize: isSmallScreen ? 18 : 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+      appBar: PreferredSize(
+        preferredSize:
+            const Size.fromHeight(80), // Increases the app bar height
+        child: AppBar(
+          title: Padding(
+            padding: const EdgeInsets.only(top: 30), // Push title downward
+            child: Text(
+              'My Profile',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 98 : 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
+          centerTitle: true,
+          backgroundColor: Colors.teal,
+          elevation: 0,
         ),
-        centerTitle: true,
-        backgroundColor: Colors.teal,
-        elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -37,18 +44,27 @@ class ProfileScreen extends StatelessWidget {
                   height: screenHeight * 0.15,
                 ),
                 Positioned(
-                  top: screenHeight * 0.075,
-                  child: CircleAvatar(
-                    radius: isSmallScreen ? 70 : 80,
-                    backgroundImage:
-                        const AssetImage('assets/images/lord_p.png')
+                  top: screenHeight * 0.07, // Moves image slightly downward
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Colors.teal, width: 7), // Teal border
+                    ),
+                    child: CircleAvatar(
+                      radius: isSmallScreen ? 70 : 80, // Same radius as before
+                      backgroundColor:
+                          Colors.white, // Optional: Ensures no overlap issues
+                      backgroundImage:
+                          const AssetImage('assets/images/lord_p.png'),
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: isSmallScreen ? 80 : 115),
+            SizedBox(height: isSmallScreen ? 80 : 110),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'BOSSING',
                 textAlign: TextAlign.center,
@@ -73,9 +89,8 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isSmallScreen ? 8.0 : 16.0,
-              ),
+              padding:
+                  EdgeInsets.symmetric(horizontal: isSmallScreen ? 8.0 : 16.0),
               child: Column(
                 children: [
                   _buildProfileOption(
@@ -84,7 +99,6 @@ class ProfileScreen extends StatelessWidget {
                       Icons.book, 'Borrowing Details', isSmallScreen),
                   _buildProfileOption(
                       Icons.settings, 'Account Settings', isSmallScreen),
-                  _buildThemeToggle(isSmallScreen),
                   _buildProfileOption(Icons.logout, 'Logout', isSmallScreen,
                       isLogout: true),
                 ],
@@ -102,65 +116,16 @@ class ProfileScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: ListTile(
         leading: Icon(icon, color: isLogout ? Colors.red : Colors.teal),
-        title: Text(
-          title,
-          style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
-        ),
-        trailing: isLogout
-            ? null
-            : const Icon(Icons.arrow_forward_ios, size: 16),
+        title: Text(title, style: TextStyle(fontSize: isSmallScreen ? 14 : 16)),
+        trailing:
+            isLogout ? null : const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {},
         contentPadding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 12 : 16,
-          vertical: 4,
-        ),
+            horizontal: isSmallScreen ? 12 : 16, vertical: 4),
       ),
     );
   }
-
-  Widget _buildThemeToggle(bool isSmallScreen) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
-        leading: const Icon(Icons.nightlight_round, color: Colors.teal),
-        title: Text('Theme', style: TextStyle(fontSize: isSmallScreen ? 14 : 16)),
-        trailing: Switch(
-          value: false,
-          onChanged: (bool value) {},
-        ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 12 : 16,
-          vertical: 4,
-        ),
-      ),
-    );
-  }
-
-  // Function to handle navigation
-  // ignore: unused_element
-  // void _navigateToScreen(BuildContext context, int index) {
-  //   switch (index) {
-  //     case 0:
-  //       Navigator.pushReplacementNamed(context, '/home');
-  //       break;
-  //     case 1:
-  //       Navigator.pushReplacementNamed(context, '/library');
-  //       break;
-  //     case 2:
-  //       Navigator.pushReplacementNamed(context, '/mybooks');
-  //       break;
-  //     case 3:
-  //       // Already on Profile, do nothing
-  //       break;
-  //   }
-  // }
 }
