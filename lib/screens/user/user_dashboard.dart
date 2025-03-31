@@ -3,6 +3,10 @@ import 'package:book_ease/screens/user/user_nav.dart';
 import 'package:book_ease/screens/user/library_screen.dart';
 import 'package:book_ease/screens/user/mybooks_screen.dart';
 import 'package:book_ease/screens/user/profile_screen.dart';
+import 'package:book_ease/widgets/appbar_widget.dart';
+import 'package:book_ease/widgets/notification_widget.dart';
+import 'package:book_ease/data/userdashbook_data.dart';
+import 'package:book_ease/data/notification_data.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -16,6 +20,7 @@ class UserDashApp extends StatefulWidget {
   _UserDashAppState createState() => _UserDashAppState();
 }
 
+// ===================== Bottom Navigation =====================
 class _UserDashAppState extends State<UserDashApp> {
   int _selectedIndex = 0;
 
@@ -36,6 +41,10 @@ class _UserDashAppState extends State<UserDashApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+        fontFamily: GoogleFonts.poppins().fontFamily,
+      ),
       home: Scaffold(
         body: _pages[_selectedIndex],
         bottomNavigationBar: NavigationBarWidget(
@@ -48,61 +57,66 @@ class _UserDashAppState extends State<UserDashApp> {
 }
 
 // ===================== Home Screen =====================
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _showNotifications = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  void _toggleNotificationOverlay() {
+    setState(() {
+      _showNotifications = !_showNotifications;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal,
-        title: _buildSearchBar(),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.white),
-            onPressed: () {},
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBarWidget(
+            onNotificationPressed: _toggleNotificationOverlay,
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionTitle('Explore Library Books'),
-            _buildBanner(),
-            const SizedBox(height: 25),
-            _buildCategoryIcons(),
-            const SizedBox(height: 10),
-            _buildBookSection(context, 'Recommendations'),
-            _buildBookSection(context, 'Trending Books'),
-            _buildBookSection(context, 'Borrowed Books'),
-          ],
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('Explore Library Books'),
+                _buildBanner(),
+                const SizedBox(height: 25),
+                _buildCategoryIcons(),
+                const SizedBox(height: 10),
+                _buildBookSection(context, 'Recommendations'),
+                _buildBookSection(context, 'Trending Books'),
+                _buildBookSection(context, 'Borrowed Books'),
+              ],
+            ),
+          ),
         ),
-      ),
+
+        // Notification Overlay
+        if (_showNotifications)
+          NotificationOverlay(
+            onClose: _toggleNotificationOverlay,
+            notifications: dummyNotifications,
+          ),
+      ],
     );
   }
 
   // ===================== UI Components =====================
-  Widget _buildSearchBar() {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search for books...',
-          hintStyle: GoogleFonts.poppins(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -204,7 +218,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildBookList(String category) {
-    final books = _getBooks(category);
+    final books = getBooks(category);
 
     return SizedBox(
       height: 150,
@@ -216,7 +230,7 @@ class HomeScreen extends StatelessWidget {
           return _buildBookTile(
             book["title"]!,
             book["copies"]!,
-            book["image"]!, // ✅ Pass image path
+            book["image"]!,
           );
         },
       ),
@@ -235,7 +249,7 @@ class HomeScreen extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               image: DecorationImage(
-                image: AssetImage(imagePath), // ✅ Use dynamic image path
+                image: AssetImage(imagePath),
                 fit: BoxFit.cover,
               ),
             ),
@@ -255,82 +269,6 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  List<Map<String, String>> _getBooks(String category) {
-    switch (category) {
-      case "Recommendations":
-        return [
-          {
-            "title": "Percy Jackson",
-            "copies": "5 copies available",
-            "image": "assets/images/percy-book.jpg"
-          },
-          {
-            "title": "Harry Potter",
-            "copies": "3 copies available",
-            "image": "assets/images/harry-book.jpg"
-          },
-          {
-            "title": "Percy Jackson",
-            "copies": "5 copies available",
-            "image": "assets/images/percy-book.jpg"
-          },
-          {
-            "title": "Harry Potter",
-            "copies": "3 copies available",
-            "image": "assets/images/harry-book.jpg"
-          },
-        ];
-      case "Trending Books":
-        return [
-          {
-            "title": "The Alchemist",
-            "copies": "7 copies available",
-            "image": "assets/images/harry-book.jpg"
-          },
-          {
-            "title": "Atomic Habits",
-            "copies": "6 copies available",
-            "image": "assets/images/percy-book.jpg"
-          },
-          {
-            "title": "The Alchemist",
-            "copies": "7 copies available",
-            "image": "assets/images/harry-book.jpg"
-          },
-          {
-            "title": "Atomic Habits",
-            "copies": "6 copies available",
-            "image": "assets/images/percy-book.jpg"
-          },
-        ];
-      case "Borrowed Books":
-        return [
-          {
-            "title": "1984",
-            "copies": "2 copies left",
-            "image": "assets/images/percy-book.jpg"
-          },
-          {
-            "title": "The Hobbit",
-            "copies": "1 copy left",
-            "image": "assets/images/harry-book.jpg"
-          },
-          {
-            "title": "1984",
-            "copies": "2 copies left",
-            "image": "assets/images/percy-book.jpg"
-          },
-          {
-            "title": "The Hobbit",
-            "copies": "1 copy left",
-            "image": "assets/images/harry-book.jpg"
-          },
-        ];
-      default:
-        return [];
-    }
   }
 }
 

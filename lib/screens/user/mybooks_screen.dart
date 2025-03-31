@@ -20,7 +20,7 @@ class MyBooksScreen extends StatelessWidget {
         ),
       ),
     );
-  } 
+  }
 
   // Function to handle navigation
   // ignore: unused_element

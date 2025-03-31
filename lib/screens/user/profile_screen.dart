@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'personal_info.dart';
+import 'package:book_ease/screens/auth/change-password.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "My Profile",
+          "My Account",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white, // ✅ White text color
@@ -114,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         const Text(
-          'BOSSING',
+          'Sherlyn',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -152,7 +153,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
           ),
           _buildProfileOption(Icons.book, 'Borrowing Details'),
-          _buildProfileOption(Icons.settings, 'Account Settings'),
+          _buildProfileOption(
+            Icons.lock,
+            'Change Password',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreatePasswordScreen(),
+                ),
+              );
+            },
+          ),
           _buildProfileOption(Icons.logout, 'Logout', isLogout: true),
         ],
       ),
