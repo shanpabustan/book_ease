@@ -7,12 +7,14 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
+  animations: ^2.0.11
   flutter:
     sdk: flutter
-
+  speech_to_text: ^7.0.0
   # cupertino_icons: ^1.0.2
-  google_fonts: ^6.2.1
+  google_fonts: ^6.1.0
   google_nav_bar: ^5.0.7
+  intl: ^0.20.2
   line_icons: ^2.0.3
     
 
@@ -29,6 +31,8 @@ flutter:
     - assets/images/banner.jpg
     - assets/images/percy-book.jpg
     - assets/images/admin_logo.png
+    - assets/images/lord_p.png
+    - assets/images/harry-book.jpg
 
 # flutter:
   fonts:

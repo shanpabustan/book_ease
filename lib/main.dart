@@ -1,24 +1,35 @@
 import 'package:flutter/material.dart';
-// import 'package:book_ease/screens/auth/additional_signup.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:book_ease/screens/auth/login.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await requestPermissions(); // Request permissions before running the app
+
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+Future<void> requestPermissions() async {
+  await Permission.camera.request();
+  await Permission.photos.request();
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BookEase',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.teal,
-        textTheme: GoogleFonts.poppinsTextTheme(), // Apply Poppins globally
+        textTheme:
+            GoogleFonts.poppinsTextTheme(), // ✅ Set default font to Poppins
       ),
-      home: const LogBookEaseApp(),
+      darkTheme: ThemeData.dark().copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(),
+      ),
+      home: const LogBookEaseApp(), // ✅ Your main screen
     );
   }
 }

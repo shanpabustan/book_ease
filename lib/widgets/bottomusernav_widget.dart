@@ -39,7 +39,7 @@ class NavigationBarWidget extends StatelessWidget {
           ),
           GButton(
             icon: LineIcons.user,
-            text: 'Profile',
+            text: 'Account',
           ),
         ],
         selectedIndex: selectedIndex,
