@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:book_ease/main.dart';
 
 class NavigationBarWidget extends StatelessWidget {
   final int selectedIndex;
@@ -22,7 +23,7 @@ class NavigationBarWidget extends StatelessWidget {
         backgroundColor: Colors.white,
         color: Colors.grey[800], // Unselected icon color
         activeColor: Colors.white,
-        tabBackgroundColor: Colors.teal, // Background color when selected
+        tabBackgroundColor: secondaryColor, // Background color when selected
         padding: const EdgeInsets.all(16),
         tabs: const [
           GButton(

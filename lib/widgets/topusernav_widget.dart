@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:book_ease/widgets/search_widget.dart';
+import 'package:book_ease/main.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onNotificationPressed;
@@ -13,7 +14,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.teal,
+      backgroundColor: secondaryColor,
       title: Row(
         children: [
           // Image.asset(

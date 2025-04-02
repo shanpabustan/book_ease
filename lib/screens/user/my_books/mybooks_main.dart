@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'package:book_ease/widgets/bottomusernav_widget.dart';
+import 'package:book_ease/main.dart';
 
 class MyBooksScreen extends StatelessWidget {
   const MyBooksScreen({super.key});
@@ -9,7 +10,7 @@ class MyBooksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal,
+        backgroundColor: secondaryColor,
         title: const Text("My Books"),
         centerTitle: true,
       ),
