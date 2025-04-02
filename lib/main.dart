@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
-// import 'package:book_ease/screens/auth/additional_signup.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:book_ease/screens/auth/login.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await requestPermissions(); // Request permissions before running the app
+
   runApp(const MyApp());
+}
+
+Future<void> requestPermissions() async {
+  await Permission.camera.request();
+  await Permission.photos.request();
 }
 
 class MyApp extends StatelessWidget {

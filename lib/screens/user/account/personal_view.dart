@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
-
-// Mock backend function (Replace with actual API call)
-Future<Map<String, dynamic>> fetchPersonalInfo() async {
-  return {
-    "id_number": "0345-22-2024",
-    "first_name": "Sherlyn",
-    "last_name": "Bagaipo",
-    "suffix": "", // Optional (can be null or empty)
-    "course": "Bachelor of Science in Information System",
-    "year_level": "4th Year",
-    "email": "shinbagaipo@gmail.com",
-    "phone": "09123456789"
-  };
-}
+import 'personal_edit.dart'; // Import the edit screen
+import 'package:book_ease/data/personal_data.dart';
 
 // Uncomment this when the backend API is ready
 // import 'package:http/http.dart' as http;
@@ -28,7 +16,7 @@ Future<Map<String, dynamic>> fetchPersonalInfo() async {
 // }
 
 class PersonalInfoScreen extends StatelessWidget {
-  const PersonalInfoScreen({super.key});
+  const PersonalInfoScreen({super.key, required Map<String, dynamic> data});
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +53,11 @@ class PersonalInfoScreen extends StatelessWidget {
           final idNumber = data["id_number"];
           final firstName = data["first_name"];
           final lastName = data["last_name"];
-          final suffix =
-              data["suffix"] ?? ""; // If suffix is null, set empty string
+          final suffix = data["suffix"] ?? "";
+          final course = data["course"];
+          final yearLevel = data["year_level"];
 
-          // ✅ Construct full name properly with optional suffix
+          // Construct full name properly with optional suffix
           final fullName = suffix.isNotEmpty
               ? "$firstName $lastName, $suffix"
               : "$firstName $lastName";
@@ -78,17 +67,33 @@ class PersonalInfoScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
-                _sectionTitle("Basic Info"),
-                _buildInfoTile(
-                    Icons.badge, idNumber, "ID Number"), // ✅ Added ID Number
-                _buildInfoTile(Icons.person, fullName, "Fullname"),
-                _buildInfoTile(Icons.school, data["course"], "Course"),
-                _buildInfoTile(Icons.grade, data["year_level"], "Year level"),
                 const SizedBox(height: 20),
+
+                // Basic Info Section with Edit Button on the Right
+                _sectionTitle(
+                  "Basic Info",
+                  onEditPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PersonalInfoEditScreen(data: data),
+                      ),
+                    );
+                  },
+                ),
+
+                _buildInfoTile(Icons.badge, idNumber, "ID Number"),
+                _buildInfoTile(Icons.person, fullName, "Full Name"),
+                _buildInfoTile(Icons.school, course, "Course"),
+                _buildInfoTile(Icons.grade, yearLevel, "Year Level"),
+
+                const SizedBox(height: 20),
+
+                // Contacts Section
                 _sectionTitle("Contacts"),
                 _buildInfoTile(Icons.email, data["email"], "Email"),
-                _buildInfoTile(Icons.phone, data["phone"], "Phone number"),
+                _buildInfoTile(Icons.phone, data["phone"], "Phone Number"),
               ],
             ),
           );
@@ -97,22 +102,33 @@ class PersonalInfoScreen extends StatelessWidget {
     );
   }
 
-  /// ✅ Extracted reusable section title
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Poppins',
+  /// Creates a section title with an optional Edit button aligned to the right.
+  Widget _sectionTitle(String title, {VoidCallback? onEditPressed}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+          ),
         ),
-      ),
+        if (onEditPressed != null)
+          TextButton.icon(
+            onPressed: onEditPressed,
+            icon: const Icon(Icons.edit, size: 18, color: Colors.teal),
+            label: const Text(
+              "Edit",
+              style: TextStyle(color: Colors.teal, fontFamily: 'Poppins'),
+            ),
+          ),
+      ],
     );
   }
 
-  /// ✅ Reusable info tile widget
+  /// Creates a ListTile for displaying user information
   Widget _buildInfoTile(IconData icon, String title, String subtitle) {
     return Card(
       elevation: 0,

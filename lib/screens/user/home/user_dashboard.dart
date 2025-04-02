@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:book_ease/screens/user/user_nav.dart';
-import 'package:book_ease/screens/user/library_screen.dart';
-import 'package:book_ease/screens/user/mybooks_screen.dart';
-import 'package:book_ease/screens/user/profile_screen.dart';
-import 'package:book_ease/widgets/appbar_widget.dart';
+import 'package:book_ease/widgets/bottomusernav_widget.dart';
+import 'package:book_ease/screens/user/library/library_main.dart';
+import 'package:book_ease/screens/user/my_books/mybooks_main.dart';
+import 'package:book_ease/screens/user/account/account_main.dart';
+import 'package:book_ease/widgets/topusernav_widget.dart';
 import 'package:book_ease/widgets/notification_widget.dart';
 import 'package:book_ease/data/userdashbook_data.dart';
 import 'package:book_ease/data/notification_data.dart';
@@ -28,7 +28,7 @@ class _UserDashAppState extends State<UserDashApp> {
     const HomeScreen(),
     const LibraryScreen(),
     const MyBooksScreen(),
-    const ProfileScreen(),
+    const AccountScreen(),
   ];
 
   void _onTabChange(int index) {

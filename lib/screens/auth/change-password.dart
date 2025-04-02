@@ -50,6 +50,35 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 24),
+              const Text(
+                'Old Password',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock, color: Colors.teal),
+                    const SizedBox(width: 10),
+                    const Text(
+                      '#aB**********',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               const Text(
                 'New Password',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -124,34 +153,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                   }
                   return null;
                 },
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Old Password',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.lock, color: Colors.teal),
-                    const SizedBox(width: 10),
-                    const Text(
-                      '#aB**********',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: 24),
               SizedBox(

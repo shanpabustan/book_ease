@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 // ignore: unused_import
-import 'package:book_ease/screens/user/user_nav.dart';
+import 'package:book_ease/widgets/bottomusernav_widget.dart';
 
-class LibraryScreen extends StatelessWidget {
-  const LibraryScreen({super.key});
+class MyBooksScreen extends StatelessWidget {
+  const MyBooksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: const Text("Library"),
+        title: const Text("My Books"),
         centerTitle: true,
       ),
       body: const Center(
         child: Text(
-          "Library Screen",
+          "My Books Screen",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
@@ -30,10 +30,10 @@ class LibraryScreen extends StatelessWidget {
   //       Navigator.pushReplacementNamed(context, '/home');
   //       break;
   //     case 1:
-  //       // Already on Library, do nothing
+  //       Navigator.pushReplacementNamed(context, '/library');
   //       break;
   //     case 2:
-  //       Navigator.pushReplacementNamed(context, '/mybooks');
+  //       // Already on My Books, do nothing
   //       break;
   //     case 3:
   //       Navigator.pushReplacementNamed(context, '/profile');
