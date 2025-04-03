@@ -1,3 +1,4 @@
+import 'package:book_ease/screens/auth/login.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
@@ -5,7 +6,9 @@ import 'package:book_ease/screens/auth/change-password.dart';
 import 'package:book_ease/screens/user/account/personal_view.dart';
 import 'package:book_ease/data/personal_data.dart';
 import 'change_photo.dart'; // Import the ChangeProfilePhotoScreen
-
+import 'package:provider/provider.dart'; // Import provider
+import 'package:book_ease/provider/user_data.dart'; // Import your UserData provider
+import 'package:book_ease/main.dart';
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
@@ -27,6 +30,10 @@ class _AccountScreenState extends State<AccountScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
 
+// Access user data from the provider
+    final userData = Provider.of<UserData>(context);
+    String fullName = "${userData.firstName} ${userData.middleName.isNotEmpty ? userData.middleName + " " : ""}${userData.lastName}${userData.suffix.isNotEmpty ? " " + userData.suffix : ""}";
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -37,7 +44,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor:secondaryColor,
         elevation: 0,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -60,7 +67,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     alignment: Alignment.center,
                     children: [
                       Container(
-                        color: Colors.teal,
+                        color: secondaryColor,
                         height: screenHeight * 0.15,
                       ),
                       Positioned(
@@ -72,7 +79,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.teal,
+                                  color: secondaryColor,
                                   width: 6,
                                 ),
                               ),
@@ -91,7 +98,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ],
                   ),
                   const SizedBox(height: 120),
-                  _buildProfileInfo(userData),
+                  _buildProfileInfo(fullName),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
@@ -104,7 +111,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               setState(() {
                                 _profileImage = image;
                               });
-                            },
+                            }, userId: '', onImagePickedWeb: (Uint8List) {  },
                           );
                         },
                         isScrollControlled:
@@ -112,7 +119,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
+                      backgroundColor: secondaryColor,
                       foregroundColor: Colors.white,
                     ),
                     child: const Text('Change Profile Photo'),
@@ -128,11 +135,11 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildProfileInfo(Map<String, dynamic> userData) {
+  Widget _buildProfileInfo(String fullName) {
     return Column(
       children: [
         Text(
-          '${userData["first_name"]} ${userData["last_name"]}',
+          fullName,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -156,7 +163,7 @@ class _AccountScreenState extends State<AccountScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PersonalInfoScreen(data: userData),
+                  builder: (context) => PersonalInfoScreen(),
                 ),
               );
             },
@@ -174,7 +181,21 @@ class _AccountScreenState extends State<AccountScreen> {
               );
             },
           ),
-          _buildProfileOption(Icons.logout, 'Logout', isLogout: true),
+            _buildProfileOption(
+            Icons.logout,
+            'Logout',
+            isLogout: true,
+            onTap: () {
+              Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LogBookEaseApp(),
+              ),
+              (route) => false,
+              );
+            },
+            ),
+          
         ],
       ),
     );

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:book_ease/data/course_data.dart'; // Import your courses data here
-
+import 'package:provider/provider.dart';
+import 'package:book_ease/provider/user_data.dart';
+import 'package:dio/dio.dart';
 class PersonalInfoEditScreen extends StatefulWidget {
-  const PersonalInfoEditScreen({super.key, required this.data});
-
-  final Map<String, dynamic> data;
+  const PersonalInfoEditScreen({super.key});
 
   @override
   _PersonalInfoEditScreenState createState() => _PersonalInfoEditScreenState();
@@ -13,7 +12,7 @@ class PersonalInfoEditScreen extends StatefulWidget {
 
 class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
   final _formKey = GlobalKey<FormState>();
-
+  final Dio _dio = Dio();
   // Controllers
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
@@ -27,33 +26,85 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
   String? _selectedCourse;
   String? _selectedYearLevel;
 
-  final List<String> _yearLevels = [
-    '1st Year',
-    '2nd Year',
-    '3rd Year',
-    '4th Year'
+ final List<String> _courses = [
+    'BS Computer Science',
+    'BS Information Technology',
+    'BS Business Administration',
+    'BS Engineering',
+    'BS Education',
   ];
+  final List<String> _yearLevels = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
 
-  @override
+
+   @override
   void initState() {
     super.initState();
-    // Initialize data using the passed-in 'data'
-    _lastNameController.text = widget.data["last_name"];
-    _firstNameController.text = widget.data["first_name"];
-    _middleNameController.text = widget.data["middle_name"] ?? "";
-    _suffixController.text = widget.data["suffix"] ?? "";
-    _emailController.text = widget.data["email"];
-    _phoneController.text = widget.data["phone"];
-    _studentIdController.text = widget.data["id_number"];
-    _selectedCourse = widget.data["course"];
-    _selectedYearLevel = widget.data["year_level"];
+    final userData = Provider.of<UserData>(context, listen: false);
+    _lastNameController.text = userData.lastName;
+    _firstNameController.text = userData.firstName;
+    _middleNameController.text = userData.middleName;
+    _suffixController.text = userData.suffix;
+    _emailController.text = userData.email;
+    _phoneController.text = userData.contactNumber;
+    _studentIdController.text = userData.userID;
+    _selectedCourse = userData.program;
+    _selectedYearLevel = userData.yearLevel;
   }
 
-  void _saveChanges() {
+  @override
+  void dispose() {
+    // Dispose controllers to avoid memory leaks
+    _lastNameController.dispose();
+    _firstNameController.dispose();
+    _middleNameController.dispose();
+    _suffixController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _studentIdController.dispose();
+    super.dispose();
+  }
+
+  
+  Future<void> _saveChanges() async {
     if (_formKey.currentState!.validate()) {
-      // Perform saving changes (implement API call if needed)
-      print("Personal info updated successfully!");
-      Navigator.pop(context);
+      try {
+        final response = await _dio.put(
+          'http://127.0.0.1:5566/stud/edit',
+          data: {
+            "user_id": _studentIdController.text,
+            "first_name": _firstNameController.text,
+            "last_name": _lastNameController.text,
+            "middle_name": _middleNameController.text,
+            "suffix": _suffixController.text.isEmpty ? "" : _suffixController.text,
+            "contact_number": _phoneController.text,
+            "program": _selectedCourse,
+            "year_level": _selectedYearLevel,
+          },
+        );
+
+        if (response.statusCode == 200) {
+          Provider.of<UserData>(context, listen: false).updateUser(
+            firstName: _firstNameController.text,
+            lastName: _lastNameController.text,
+            middleName: _middleNameController.text,
+            suffix: _suffixController.text,
+            contactNumber: _phoneController.text,
+            program: _selectedCourse ?? '',
+            yearLevel: _selectedYearLevel ?? '',
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("User info updated successfully!")),
+          );
+          Navigator.pop(context);
+        } else {
+          throw Exception("Failed to update user");
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
     }
   }
 
@@ -65,8 +116,8 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
           "Edit Personal Information",
           style: TextStyle(
             color: Colors.white,
-            fontFamily: 'Poppins', // Apply Poppins font
-            fontWeight: FontWeight.bold, // Optional: Adjust weight
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.teal,
@@ -84,20 +135,16 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
                   const SizedBox(height: 50),
 
                   // Non-editable fields
-                  _buildDisabledField("Last Name", _lastNameController),
+                  _buildTextField("Last Name", _lastNameController),
                   const SizedBox(height: 10),
-                  _buildDisabledField("First Name", _firstNameController),
+                  _buildTextField("First Name", _firstNameController),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(
-                          child: _buildDisabledField(
-                              "Middle Name", _middleNameController)),
+                      Expanded(child: _buildTextField("Middle Name", _middleNameController)),
                       const SizedBox(width: 10),
-                      SizedBox(
-                          width: 80,
-                          child:
-                              _buildDisabledField("Suffix", _suffixController)),
+                      SizedBox(width: 80, child: _buildTextField("Suffix", _suffixController, 
+                      validator: (value) => _validateField(value, "Suffix", required: false),)),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -113,14 +160,14 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
                   const SizedBox(height: 10),
                   _buildDisabledField("Email", _emailController),
                   const SizedBox(height: 10),
-                  _buildTextField("Student ID", _studentIdController),
+                  _buildDisabledField("Student ID", _studentIdController),
                   const SizedBox(height: 15),
 
                   // Dropdowns
                   _buildDropdownField(
                     "Course",
                     _selectedCourse,
-                    CourseData.courses,
+                    _courses,
                     (value) => setState(() => _selectedCourse = value),
                   ),
                   const SizedBox(height: 15),
@@ -189,7 +236,7 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
     );
   }
 
-  // Dropdown Fields (Now Removing Duplicates)
+  // // Dropdown Fields
   Widget _buildDropdownField(
     String label,
     String? value,
@@ -198,31 +245,26 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
   ) {
     items = items.toSet().toList(); // Remove duplicates
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-        child: DropdownButtonFormField<String>(
-          value: value,
-          validator: (val) => val == null ? '$label is required' : null,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(color: Colors.grey),
-            floatingLabelStyle: const TextStyle(color: Colors.teal),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.teal, width: 2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          items: items
-              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-              .toList(),
-          onChanged: onChanged,
-          dropdownColor: Colors.white,
+    return DropdownButtonFormField<String>(
+      value: value,
+      validator: (val) => val == null ? '$label is required' : null,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+        floatingLabelStyle: const TextStyle(color: Colors.teal),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.teal, width: 2),
+          borderRadius: BorderRadius.circular(10),
         ),
-      );
-    });
+      ),
+      items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+      onChanged: onChanged,
+      dropdownColor: Colors.white,
+    );
   }
+
+
 
   // Save Button
   Widget _saveButton() {
@@ -232,23 +274,23 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
         onPressed: _saveChanges,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 12),
-          child: Text("Save Changes",
-              style: TextStyle(fontSize: 16, color: Colors.white)),
+          child: Text("Save Changes", style: TextStyle(fontSize: 16, color: Colors.white)),
         ),
       ),
     );
   }
 
   // Field Validation
-  String? _validateField(String? value, String fieldName) {
-    if (value == null || value.isEmpty) return '$fieldName is required';
-    return null;
+  String? _validateField(String? value, String fieldName, {bool required = true}) {
+  if (required && (value == null || value.isEmpty)) {
+    return '$fieldName is required';
   }
+  return null;
+}
 
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) return 'Phone number is required';

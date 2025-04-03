@@ -1,23 +1,33 @@
+import 'package:book_ease/provider/user_data.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'dart:io'; // Required for mobile file handling
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data'; // Required for handling file data on web
+import 'package:provider/provider.dart';
+
 
 class ChangeProfilePhotoScreen extends StatefulWidget {
-  final Function(File?) onImagePicked;
+  final Function(File?) onImagePicked; // For mobile
+  final Function(Uint8List?) onImagePickedWeb; // For web
 
-  const ChangeProfilePhotoScreen({super.key, required this.onImagePicked});
+  const ChangeProfilePhotoScreen({
+    super.key,
+    required this.onImagePicked,
+    required this.onImagePickedWeb, required String userId,
+  });
 
   @override
-  _ChangeProfilePhotoScreenState createState() =>
-      _ChangeProfilePhotoScreenState();
+  _ChangeProfilePhotoScreenState createState() => _ChangeProfilePhotoScreenState();
 }
 
 class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
-  bool _isPickingImage = false; // Prevents multiple selections
+  bool _isPickingImage = false;
+  final Dio _dio = Dio(); // Dio for API requests
 
-  // Request permissions for camera and gallery
   Future<bool> _requestPermission(ImageSource source) async {
     if (source == ImageSource.camera) {
       var status = await Permission.camera.request();
@@ -35,7 +45,6 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
     return true;
   }
 
-  // Show permission dialog if denied
   void _showPermissionDialog(String type) {
     showDialog(
       context: context,
@@ -43,9 +52,7 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
         title: Text("$type Permission Required"),
         content: Text("Please enable $type access in settings to proceed."),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel")),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
             onPressed: () {
               openAppSettings();
@@ -58,10 +65,10 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
     );
   }
 
-  // Function to pick an image
-  Future<void> _pickImage(ImageSource source) async {
-    if (_isPickingImage) return; // Prevent multiple taps
-    setState(() => _isPickingImage = true); // Lock selection
+  // 📸 Mobile Image Picker
+  Future<void> _pickImageMobile(ImageSource source) async {
+    if (_isPickingImage) return;
+    setState(() => _isPickingImage = true);
 
     bool permissionGranted = await _requestPermission(source);
     if (!permissionGranted) {
@@ -72,11 +79,86 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      widget.onImagePicked(File(pickedFile.path)); // Return selected image
-      Navigator.pop(context); // Close bottom sheet
+      File imageFile = File(pickedFile.path);
+      widget.onImagePicked(imageFile); // Call function for mobile
+      _uploadImage(imageFile);
     }
 
-    setState(() => _isPickingImage = false); // Unlock selection
+    setState(() => _isPickingImage = false);
+  }
+
+  // 🌐 Web Image Picker
+  Future<void> _pickImageWeb() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      Uint8List fileBytes = result.files.first.bytes!;
+      String fileName = result.files.first.name;
+
+      print("File selected: $fileName");
+
+      widget.onImagePickedWeb(fileBytes); // Call function for web
+      _uploadImageWeb(fileBytes, fileName);
+      Navigator.pop(context);
+    } else {
+      print("No image selected");
+    }
+  }
+
+  // 📤 Upload Image (Mobile)
+  Future<void> _uploadImage(File imageFile) async {
+    String userId = Provider.of<UserData>(context, listen: false).userID; // Fetch user_id from provider
+    String apiUrl = "http://127.0.0.1:5566/stud/add-pic";
+    FormData formData = FormData.fromMap({
+      "user_id": userId, // Pass user_id from provider
+      "picture": await MultipartFile.fromFile(imageFile.path, filename: "profile.jpg"),
+    });
+
+    try {
+      Response response = await _dio.post(
+        apiUrl,
+        data: formData,
+        options: Options(
+          headers: {"Content-Type": "multipart/form-data"}, // Explicit content-type
+        ),
+      );
+      if (response.statusCode == 200) {
+        print("Profile picture uploaded successfully");
+      } else {
+        print("Failed to upload image: ${response.data}");
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
+  }
+
+  // 📤 Upload Image (Web)
+  Future<void> _uploadImageWeb(Uint8List fileBytes, String fileName) async {
+    String userId = Provider.of<UserData>(context, listen: false).userID; // Fetch user_id from provider
+    String apiUrl = "http://127.0.0.1:5566/stud/add-pic";
+    FormData formData = FormData.fromMap({
+      "user_id": userId, // Pass user_id from provider
+      "picture": MultipartFile.fromBytes(fileBytes, filename: fileName),
+    });
+
+    try {
+      Response response = await _dio.post(
+        apiUrl,
+        data: formData,
+        options: Options(
+          headers: {"Content-Type": "multipart/form-data"}, // Explicit content-type
+        ),
+      );
+      if (response.statusCode == 200) {
+        print("Profile picture uploaded successfully");
+      } else {
+        print("Failed to upload image: ${response.data}");
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
   }
 
   @override
@@ -97,7 +179,6 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
               ),
               child: Column(
                 children: [
-                  // Drag Indicator
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Container(
@@ -109,8 +190,6 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
                       ),
                     ),
                   ),
-
-                  // Title
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Center(
@@ -124,8 +203,6 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
                       ),
                     ),
                   ),
-
-                  // Options to pick image
                   Expanded(
                     child: ListView(
                       controller: scrollController,
@@ -133,12 +210,12 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
                         _buildPhotoOptionButton(
                           Icons.camera_alt,
                           "Take a Photo",
-                          ImageSource.camera,
+                          () => _pickImageMobile(ImageSource.camera), // Mobile Camera
                         ),
                         _buildPhotoOptionButton(
                           Icons.photo_library,
                           "Choose from Gallery",
-                          ImageSource.gallery,
+                          () => _pickImageWeb(), // Web Image Picker
                         ),
                       ],
                     ),
@@ -152,15 +229,11 @@ class _ChangeProfilePhotoScreenState extends State<ChangeProfilePhotoScreen> {
     );
   }
 
-  // Helper method to build the option buttons
-  Widget _buildPhotoOptionButton(
-      IconData icon, String label, ImageSource source) {
+  Widget _buildPhotoOptionButton(IconData icon, String label, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
       child: ElevatedButton.icon(
-        onPressed: _isPickingImage
-            ? null
-            : () => _pickImage(source), // Disable if busy
+        onPressed: _isPickingImage ? null : onPressed,
         icon: Icon(icon, color: Colors.white),
         label: Text(label),
         style: ElevatedButton.styleFrom(

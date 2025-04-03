@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../user/home/user_dashboard.dart';
-// import 'signup.dart'; // ✅ Import the SignUp Screen
+import 'package:book_ease/screens/user/home/user_dashboard.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'multisignup.dart';
+import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';  // Import provider
+import 'package:book_ease/provider/user_data.dart';// Import your UserData provider
+//import 'package:book_ease/screens/admin/admin_dashboard.dart';
 
 void main() {
   runApp(const LogBookEaseApp());
@@ -16,13 +19,120 @@ class LogBookEaseApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      initialRoute: '/', // Starting route
+      routes: {
+        '/': (context) => const LoginScreen(),
+        '/userDashboard': (context) => const UserDashApp(), // Your user dashboard widget
+      },
     );
   }
 }
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  void _loginUser() async {
+    final Dio dio = Dio();
+
+    // 🔥 Use the correct API URL (Replace with your actual API URL if needed)
+    const String apiUrl = "http://127.0.0.1:5566/stud/login"; // Replace with your API URL
+
+    try {
+      // Make POST request with the correct body
+      Response response = await dio.post(
+        apiUrl,
+        data: {
+          "user_id": _idController.text,
+          "password": _passwordController.text,
+        },
+        options: Options(headers: {"Content-Type": "application/json"}),
+      );
+
+      // Checking if the response is successful
+      if (response.data["retCode"] == "200") {
+        final userData = response.data["data"];
+        String userType = response.data["data"]["user_type"];
+
+        debugPrint("Response Data: ${response.data}");
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Login Successful!")),
+          );
+        }
+
+      // Set user data in the UserData provider
+        final userProvider = Provider.of<UserData>(context, listen: false);
+        userProvider.setUserData(
+          userID: userData["user_id"],
+          userType: userData["user_type"],
+          lastName: userData["last_name"],
+          firstName: userData["first_name"],
+          middleName: userData["middle_name"],
+          suffix: userData["suffix"],
+          email: userData["email"],
+          program: userData["program"],
+          yearLevel: userData["year_level"],
+          contactNumber: userData["contact_number"],
+          picture: userData ["picture"]?? "",
+          
+        );
+
+
+        // Navigate based on the user type
+      switch (userType) {
+        case "Admin":
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MultiStepSignUpScreen()), // Assuming you have this route
+          );
+          break;
+        case "Student":
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const UserDashApp()),
+          );
+          break;
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Unknown user type!")),
+          );
+          break;
+      }
+      } else {
+        // Show error message if login fails
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.data["message"] ?? 'Unknown error')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("API ERROR: ${e.toString()}");
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to login. Please try again.")),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _idController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +168,7 @@ class LoginScreen extends StatelessWidget {
                                   fit: BoxFit.contain,
                                 ),
                                 Transform.translate(
-                                  offset: const Offset(0,
-                                      -95), // Moves text **UPWARD** by 20 pixels
+                                  offset: const Offset(0, -95), // Moves text **UPWARD** by 20 pixels
                                   child: Column(
                                     children: [
                                       Text(
@@ -71,8 +180,7 @@ class LoginScreen extends StatelessWidget {
                                               255, 255, 255, 255),
                                         ),
                                       ),
-                                      const SizedBox(
-                                          height: 2), // Minimal spacing
+                                      const SizedBox(height: 2), // Minimal spacing
                                       Text(
                                         "BORROW SMART",
                                         style: GoogleFonts.poppins(
@@ -154,6 +262,7 @@ class LoginScreen extends StatelessWidget {
 
           // 📌 ID Number Field
           TextField(
+            controller: _idController,
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^[0-9]+$')),
@@ -175,7 +284,7 @@ class LoginScreen extends StatelessWidget {
           const SizedBox(height: 15),
 
           // 📌 Password Field
-          const PasswordField(),
+          PasswordField(controller: _passwordController),
           const SizedBox(height: 10),
 
           // 📌 Forgot Password
@@ -202,13 +311,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const UserDashApp(), // ✅ Navigates to Dashboard
-                  ),
-                );
+                _loginUser();
               },
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -254,18 +357,21 @@ class LoginScreen extends StatelessWidget {
 }
 
 class PasswordField extends StatefulWidget {
-  const PasswordField({super.key});
+  final TextEditingController controller;
+
+  const PasswordField({super.key, required this.controller});
 
   @override
-  PasswordFieldState createState() => PasswordFieldState();
+  _PasswordFieldState createState() => _PasswordFieldState();
 }
 
-class PasswordFieldState extends State<PasswordField> {
+class _PasswordFieldState extends State<PasswordField> {
   bool isObscured = true;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: widget.controller,
       obscureText: isObscured,
       cursorColor: Colors.teal,
       style: const TextStyle(color: Colors.black),

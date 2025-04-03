@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:book_ease/screens/auth/login.dart';
+import 'package:dio/dio.dart';
 
 class MultiStepSignUpScreen extends StatefulWidget {
   const MultiStepSignUpScreen({super.key});
@@ -36,11 +37,11 @@ class _MultiStepSignUpScreenState extends State<MultiStepSignUpScreen> {
   bool _obscureConfirmPassword = true;
 
   final List<String> _courses = [
-    'Computer Science',
-    'Information Technology',
-    'Business Administration',
-    'Engineering',
-    'Education',
+    'BS Computer Science',
+    'BS Information Technology',
+    'BS Business Administration',
+    'BS Engineering',
+    'BS Education',
   ];
 
   final List<String> _yearLevels = [
@@ -107,15 +108,66 @@ class _MultiStepSignUpScreenState extends State<MultiStepSignUpScreen> {
 
   // MULTI STEP FEATURES
 
-  void _nextStep() {
-    if (_currentStep == 0 && _formKeyStep1.currentState!.validate()) {
-      setState(() => _currentStep = 1);
-    } else if (_currentStep == 1 && _formKeyStep2.currentState!.validate()) {
-      print("Form Submitted Successfully!");
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => LogBookEaseApp()));
+ 
+  void _nextStep() async {
+  if (_currentStep == 0 && _formKeyStep1.currentState!.validate()) {
+    setState(() => _currentStep = 1);
+  } else if (_currentStep == 1 && _formKeyStep2.currentState!.validate()) {
+    _registerUser(); // ✅ Call the API when all steps are valid
+  }
+}
+
+void _registerUser() async {
+  final Dio dio = Dio();
+
+  // 🔥 Use correct API URL (Replace with your actual IP)
+  const String apiUrl = "http://127.0.0.1:5566/stud/register";  
+
+  try {
+    Response response = await dio.post(
+      apiUrl,
+      data: {
+        "last_name": _lastNameController.text,
+        "first_name": _firstNameController.text,
+        "middle_name": _middleNameController.text,
+        "suffix": _suffixController.text,
+        "contact_number": _phoneController.text,
+        "email": _emailController.text,
+        "user_id": _studentIdController.text, // Manually input by the student
+        "program": _selectedCourse,
+        "year_level": _selectedYearLevel,
+        "password": _passwordController.text,    
+      },
+      options: Options(headers: {"Content-Type": "application/json"}),
+    );
+
+    if (response.data["RetCode"] == "201") {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration Successful!"))
+        );
+
+        // Navigate to Login Screen
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.data["Message"]))
+        );
+      }
+    }
+  } catch (e) {
+    // Use a logging framework instead of print
+    debugPrint("API ERROR: ${e.toString()}");
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to register. Please try again."))
+      );
     }
   }
+}
 
   // ignore: unused_element
   void _prevStep() {

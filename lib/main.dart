@@ -1,8 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:book_ease/screens/auth/login.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';  // Import provider
+import 'package:book_ease/provider/user_data.dart';// Import your UserData provider
 
+const Color secondaryColor = Color.fromRGBO(49, 120, 115, 1);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await requestPermissions(); // Request permissions before running the app
@@ -11,6 +15,11 @@ void main() async {
 }
 
 Future<void> requestPermissions() async {
+  if (kIsWeb) {
+    print("Skipping permission requests on web.");
+    return;
+  }
+
   await Permission.camera.request();
   await Permission.photos.request();
 }
@@ -18,18 +27,31 @@ Future<void> requestPermissions() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
+ @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textTheme:
-            GoogleFonts.poppinsTextTheme(), // ✅ Set default font to Poppins
+    return ChangeNotifierProvider(
+      create: (context) => UserData(),  // Set up the provider for UserData
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: secondaryColor,
+         textTheme: GoogleFonts.poppinsTextTheme(
+           ThemeData.light()
+               .textTheme, // ✅ Explicitly merging with default text theme
+         ),
+         ),
+        darkTheme: ThemeData.dark().copyWith(
+          textTheme: GoogleFonts.poppinsTextTheme(
+           ThemeData.dark()
+               .textTheme, // ✅ Merge with dark theme to avoid conflict
+         ),
+       ),
+        home: const LogBookEaseApp(), // Main screen after login or wherever you direct
       ),
-      darkTheme: ThemeData.dark().copyWith(
-        textTheme: GoogleFonts.poppinsTextTheme(),
-      ),
-      home: const LogBookEaseApp(), // ✅ Your main screen
     );
   }
 }
+
+
+
+

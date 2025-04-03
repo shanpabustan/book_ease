@@ -3,6 +3,7 @@ class CourseData {
     'Computer Science',
     'Information System',
     'Information Technology',
+    'BS Information Techology',
     'Computer Engineering',
     'Information System', // Duplicate for testing purposes
   ];

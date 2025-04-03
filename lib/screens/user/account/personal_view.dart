@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
-import 'personal_edit.dart'; // Import the edit screen
-import 'package:book_ease/data/personal_data.dart';
+import 'package:provider/provider.dart'; // Import provider
+import 'package:book_ease/provider/user_data.dart'; // Import your UserData provider
+import 'personal_edit.dart';
 
-// Uncomment this when the backend API is ready
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
-// Future<Map<String, dynamic>> fetchPersonalInfo() async {
-//   final response = await http.get(Uri.parse('https://yourapi.com/user-info'));
 
-//   if (response.statusCode == 200) {
-//     return json.decode(response.body);
-//   } else {
-//     throw Exception("Failed to load data");
-//   }
-// }
 
 class PersonalInfoScreen extends StatelessWidget {
-  const PersonalInfoScreen({super.key, required Map<String, dynamic> data});
+  const PersonalInfoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Access user data from the provider
+    final userData = Provider.of<UserData>(context);
+
+    // Construct full name properly with optional suffix
+    final fullName = userData.suffix.isNotEmpty
+        ? "${userData.firstName} ${userData.middleName} ${userData.lastName}, ${userData.suffix}"
+        : "${userData.firstName} ${userData.middleName} ${userData.lastName}";
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -38,66 +36,30 @@ class PersonalInfoScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: fetchPersonalInfo(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Error loading data"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No data available"));
-          }
-
-          final data = snapshot.data!;
-          final idNumber = data["id_number"];
-          final firstName = data["first_name"];
-          final lastName = data["last_name"];
-          final suffix = data["suffix"] ?? "";
-          final course = data["course"];
-          final yearLevel = data["year_level"];
-
-          // Construct full name properly with optional suffix
-          final fullName = suffix.isNotEmpty
-              ? "$firstName $lastName, $suffix"
-              : "$firstName $lastName";
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-
-                // Basic Info Section with Edit Button on the Right
-                _sectionTitle(
-                  "Basic Info",
-                  onEditPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            PersonalInfoEditScreen(data: data),
-                      ),
-                    );
-                  },
-                ),
-
-                _buildInfoTile(Icons.badge, idNumber, "ID Number"),
-                _buildInfoTile(Icons.person, fullName, "Full Name"),
-                _buildInfoTile(Icons.school, course, "Course"),
-                _buildInfoTile(Icons.grade, yearLevel, "Year Level"),
-
-                const SizedBox(height: 20),
-
-                // Contacts Section
-                _sectionTitle("Contacts"),
-                _buildInfoTile(Icons.email, data["email"], "Email"),
-                _buildInfoTile(Icons.phone, data["phone"], "Phone Number"),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10),
+            _sectionTitle("Basic Info", onEditPressed: () {
+            Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PersonalInfoEditScreen(), // No data passed
             ),
           );
-        },
+            }),
+            _buildInfoTile(Icons.badge, userData.userID, "ID Number"),
+            _buildInfoTile(Icons.person, fullName, "Fullname"),
+            _buildInfoTile(Icons.school, userData.program, "Course"),
+            _buildInfoTile(Icons.grade, userData.yearLevel, "Year level"),
+            const SizedBox(height: 20),
+            _sectionTitle("Contacts"),
+            _buildInfoTile(Icons.email, userData.email, "Email"),
+            _buildInfoTile(Icons.phone, userData.contactNumber, "Phone number"),
+          ],
+        ),
       ),
     );
   }
@@ -128,7 +90,7 @@ class PersonalInfoScreen extends StatelessWidget {
     );
   }
 
-  /// Creates a ListTile for displaying user information
+  /// Reusable info tile widget
   Widget _buildInfoTile(IconData icon, String title, String subtitle) {
     return Card(
       elevation: 0,

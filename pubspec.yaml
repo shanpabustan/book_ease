@@ -1,5 +1,5 @@
 name: book_ease
-description: "A new Flutter project."
+description: "Ang Book ko ay Book ng lahat"
 publish_to: 'none'
 version: 0.1.0
 
@@ -16,6 +16,11 @@ dependencies:
   google_nav_bar: ^5.0.7
   intl: ^0.20.2
   line_icons: ^2.0.3
+  image_picker: ^1.1.2
+  permission_handler: ^11.4.0
+  dio: ^5.8.0+1
+  provider: ^6.1.4
+  file_picker: ^10.0.0
     
 
 dev_dependencies:
@@ -31,7 +36,6 @@ flutter:
     - assets/images/banner.jpg
     - assets/images/percy-book.jpg
     - assets/images/admin_logo.png
-    - assets/images/lord_p.png
     - assets/images/harry-book.jpg
 
 # flutter:
