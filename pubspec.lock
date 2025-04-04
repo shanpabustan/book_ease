@@ -9,22 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.11"
-  archive:
-    dependency: transitive
-    description:
-      name: archive
-      sha256: "7dcbd0f87fe5f61cb28da39a1a8b70dbc106e2fe0516f7836eb7bb2948481a12"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.5"
-  args:
-    dependency: transitive
-    description:
-      name: args
-      sha256: d0481093c50b1da8910eb0bb301626d4d8eb7284aa739614d2b394ee09e3ea04
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.0"
   async:
     dependency: transitive
     description:
@@ -150,8 +134,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
-=======
   flutter_animate:
     dependency: "direct main"
     description:
@@ -168,15 +150,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.2"
-  flutter_launcher_icons:
-    dependency: "direct dev"
-    description:
-      name: flutter_launcher_icons
-      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.1"
->>>>>>> ea5e8d77eb135ae3a313be5bb26325918fb5c007
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -243,16 +216,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-<<<<<<< HEAD
-=======
-  image:
-    dependency: transitive
-    description:
-      name: image
-      sha256: "4e973fcf4caae1a4be2fa0a13157aa38a8f9cb049db6529aa00b4d71abc4d928"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.5.4"
   image_picker:
     dependency: "direct main"
     description:
@@ -333,7 +296,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
->>>>>>> ea5e8d77eb135ae3a313be5bb26325918fb5c007
   leak_tracker:
     dependency: transitive
     description:
@@ -462,8 +424,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-<<<<<<< HEAD
-=======
   pedantic:
     dependency: transitive
     description:
@@ -520,15 +480,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
-  petitparser:
-    dependency: transitive
-    description:
-      name: petitparser
-      sha256: c15605cd28af66339f8eb6fbe0e541bfe2d1b72d5825efc6598f3e0a31b9ad27
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.2"
->>>>>>> ea5e8d77eb135ae3a313be5bb26325918fb5c007
   platform:
     dependency: transitive
     description:
