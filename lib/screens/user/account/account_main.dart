@@ -5,6 +5,7 @@ import 'package:book_ease/screens/auth/change-password.dart';
 import 'package:book_ease/screens/user/account/personal_view.dart';
 import 'package:book_ease/data/personal_data.dart';
 import 'change_photo.dart'; // Import the ChangeProfilePhotoScreen
+import 'package:book_ease/main.dart'; // ✅ Import main.dart to access secondaryColor
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -37,7 +38,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor: secondaryColor, // ✅ Replaced Colors.teal
         elevation: 0,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -60,7 +61,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     alignment: Alignment.center,
                     children: [
                       Container(
-                        color: Colors.teal,
+                        color: secondaryColor, // ✅ Replaced Colors.teal
                         height: screenHeight * 0.15,
                       ),
                       Positioned(
@@ -72,7 +73,8 @@ class _AccountScreenState extends State<AccountScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.teal,
+                                  color:
+                                      secondaryColor, // ✅ Replaced Colors.teal
                                   width: 6,
                                 ),
                               ),
@@ -112,7 +114,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
+                      backgroundColor: secondaryColor, // ✅ Replaced Colors.teal
                       foregroundColor: Colors.white,
                     ),
                     child: const Text('Change Profile Photo'),
@@ -187,7 +189,10 @@ class _AccountScreenState extends State<AccountScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: ListTile(
-        leading: Icon(icon, color: isLogout ? Colors.red : Colors.teal),
+        leading: Icon(icon,
+            color: isLogout
+                ? Colors.red
+                : secondaryColor), // ✅ Replaced Colors.teal
         title: Text(
           title,
           style: const TextStyle(fontFamily: 'Poppins'),
