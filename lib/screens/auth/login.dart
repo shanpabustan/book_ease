@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
           program: userData["program"],
           yearLevel: userData["year_level"],
           contactNumber: userData["contact_number"],
-          picture: userData ["picture"]?? "",
+          avatarPath: userData ["avatar_path"]?? "",
           
         );
 

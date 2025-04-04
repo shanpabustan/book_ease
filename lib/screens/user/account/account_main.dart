@@ -2,13 +2,14 @@ import 'package:book_ease/screens/auth/login.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:book_ease/screens/auth/change-password.dart';
 import 'package:book_ease/screens/user/account/personal_view.dart';
 import 'package:book_ease/data/personal_data.dart';
-import 'change_photo.dart'; // Import the ChangeProfilePhotoScreen
-import 'package:provider/provider.dart'; // Import provider
-import 'package:book_ease/provider/user_data.dart'; // Import your UserData provider
+import 'package:provider/provider.dart';
+import 'package:book_ease/provider/user_data.dart';
 import 'package:book_ease/main.dart';
+
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
@@ -17,11 +18,54 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  File? _profileImage; // Stores the selected image file
+  File? _profileImage;
+  String? _selectedAvatarPath;
+  final Dio _dio = Dio();
 
-  // Function to load personal information
+  final List<String> _avatarChoices = [
+    'assets/icons/j-rizz.png',
+    'assets/icons/boy-icon.png',
+    'assets/icons/girl-icon.png',
+    'assets/icons/girl-2.png',
+    'assets/icons/reading_book.png',
+    'assets/icons/student-boy.png',
+  ];
+
   Future<Map<String, dynamic>> _loadPersonalInfo() async {
-    return await fetchPersonalInfo(); // Fetch data from personal_data.dart
+    return await fetchPersonalInfo();
+  }
+
+  Future<void> _updateAvatar(String avatarPath) async {
+    final userData = Provider.of<UserData>(context, listen: false);
+
+    try {
+      Response response = await _dio.post(
+        "http://127.0.0.1:5566/stud/add-pic", // Replace with actual API URL
+        data: {
+          "user_id": userData.userID,
+          "avatar_path": avatarPath,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        userData.setAvatarPath(avatarPath); // Update locally
+
+        setState(() {
+          _selectedAvatarPath = avatarPath;
+          _profileImage = null;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Avatar updated successfully!")),
+        );
+      } else {
+        throw Exception("Failed to update avatar");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error updating avatar: $e")),
+      );
+    }
   }
 
   @override
@@ -30,9 +74,9 @@ class _AccountScreenState extends State<AccountScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
 
-// Access user data from the provider
     final userData = Provider.of<UserData>(context);
-    String fullName = "${userData.firstName} ${userData.middleName.isNotEmpty ? userData.middleName + " " : ""}${userData.lastName}${userData.suffix.isNotEmpty ? " " + userData.suffix : ""}";
+    String fullName =
+        "${userData.firstName} ${userData.middleName.isNotEmpty ? userData.middleName + " " : ""}${userData.lastName}${userData.suffix.isNotEmpty ? " " + userData.suffix : ""}";
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +88,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor:secondaryColor,
+        backgroundColor: secondaryColor,
         elevation: 0,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -57,8 +101,6 @@ class _AccountScreenState extends State<AccountScreen> {
           } else if (!snapshot.hasData) {
             return const Center(child: Text('No data available'));
           } else {
-            final userData = snapshot.data!;
-
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -87,9 +129,12 @@ class _AccountScreenState extends State<AccountScreen> {
                                 radius: isSmallScreen ? 70 : 80,
                                 backgroundColor: Colors.white,
                                 backgroundImage: _profileImage != null
-                                    ? FileImage(_profileImage!) as ImageProvider
-                                    : const NetworkImage(
-                                        'https://example.com/default-avatar.png'),
+                                    ? FileImage(_profileImage!)
+                                    : (_selectedAvatarPath != null
+                                        ? AssetImage(_selectedAvatarPath!)
+                                        : AssetImage(userData.avatarPath.isNotEmpty
+                                            ? userData.avatarPath
+                                            : 'assets/icons/boy-icon.png')) as ImageProvider,
                               ),
                             ),
                           ],
@@ -102,30 +147,63 @@ class _AccountScreenState extends State<AccountScreen> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      // Show ChangeProfilePhotoScreen as an overlay
                       showModalBottomSheet(
                         context: context,
                         builder: (context) {
-                          return ChangeProfilePhotoScreen(
-                            onImagePicked: (File? image) {
-                              setState(() {
-                                _profileImage = image;
-                              });
-                            }, userId: '', onImagePickedWeb: (Uint8List) {  },
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Choose Your Avatar",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                  ),
+                                  itemCount: _avatarChoices.length,
+                                  itemBuilder: (context, index) {
+                                    final avatarPath = _avatarChoices[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        _updateAvatar(avatarPath);
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 40,
+                                        backgroundImage:
+                                            AssetImage(avatarPath),
+                                        backgroundColor: Colors.grey[200],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           );
                         },
-                        isScrollControlled:
-                            true, // This allows the sheet to have custom height
+                        isScrollControlled: true,
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: secondaryColor,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Change Profile Photo'),
+                    child: const Text('Choose Avatar'),
                   ),
                   const SizedBox(height: 20),
-                  _buildProfileOptions(context, isSmallScreen, userData),
+                  _buildProfileOptions(context, isSmallScreen),
                 ],
               ),
             );
@@ -150,8 +228,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildProfileOptions(
-      BuildContext context, bool isSmallScreen, Map<String, dynamic> userData) {
+  Widget _buildProfileOptions(BuildContext context, bool isSmallScreen) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 8.0 : 16.0),
       child: Column(
@@ -181,27 +258,27 @@ class _AccountScreenState extends State<AccountScreen> {
               );
             },
           ),
-            _buildProfileOption(
+          _buildProfileOption(
             Icons.logout,
             'Logout',
             isLogout: true,
             onTap: () {
               Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LogBookEaseApp(),
-              ),
-              (route) => false,
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LogBookEaseApp(),
+                ),
+                (route) => false,
               );
             },
-            ),
-          
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildProfileOption(IconData icon, String title,
+Widget _buildProfileOption(IconData icon, String title,
       {bool isLogout = false, VoidCallback? onTap}) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -216,8 +293,8 @@ class _AccountScreenState extends State<AccountScreen> {
         trailing:
             isLogout ? null : const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }
-}

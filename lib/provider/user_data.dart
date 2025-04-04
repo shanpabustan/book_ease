@@ -11,9 +11,9 @@ class UserData with ChangeNotifier {
   String _program = '';
   String _yearLevel = '';
   String _contactNumber = '';
-  String _picture = '';
+  String _avatarPath = ''; // NEW: Added avatarPath field
 
-
+  // Getters
   String get userID => _userID;
   String get userType => _userType;
   String get lastName => _lastName;
@@ -24,8 +24,7 @@ class UserData with ChangeNotifier {
   String get program => _program;
   String get yearLevel => _yearLevel;
   String get contactNumber => _contactNumber;
-  String get picture => _picture;
-
+  String get avatarPath => _avatarPath; // NEW: Getter for avatarPath
 
   // Setters to update the data
   void setUserData({
@@ -39,8 +38,7 @@ class UserData with ChangeNotifier {
     required String program,
     required String yearLevel,
     required String contactNumber,
-    required String picture,
-
+    required String avatarPath, // NEW: Added avatarPath
   }) {
     _userID = userID;
     _userType = userType;
@@ -52,30 +50,35 @@ class UserData with ChangeNotifier {
     _program = program;
     _yearLevel = yearLevel;
     _contactNumber = contactNumber;
-    _picture = picture;
+    _avatarPath = avatarPath; // NEW: Save avatarPath
+
     notifyListeners(); // Notify listeners about data change
   }
- 
- void updateUser({
-  required String firstName,
-  required String lastName,
-  required String middleName,
-  required String suffix,
-  required String contactNumber,
-  required String? program,  // Allow null, but handle it properly
-  required String? yearLevel,
-}) {
-  _firstName = firstName;
-  _lastName = lastName;
-  _middleName = middleName;
-  _suffix = suffix;
-  _contactNumber = contactNumber;
-  _program = program ?? _program;  // Retain old value if null
-  _yearLevel = yearLevel ?? _yearLevel;
-  notifyListeners();
+
+  // Function to update avatarPath
+  void setAvatarPath(String path) {
+    _avatarPath = path;
+    notifyListeners();
+  }
+
+  void updateUser({
+    required String firstName,
+    required String lastName,
+    required String middleName,
+    required String suffix,
+    required String contactNumber,
+    required String? program,  // Allow null, but handle it properly
+    required String? yearLevel,
+    
+  }) {
+    _firstName = firstName;
+    _lastName = lastName;
+    _middleName = middleName;
+    _suffix = suffix;
+    _contactNumber = contactNumber;
+    _program = program ?? _program;  // Retain old value if null
+    _yearLevel = yearLevel ?? _yearLevel;
+    
+    notifyListeners();
+  }
 }
-
-
-
-}
-

@@ -37,6 +37,13 @@ flutter:
     - assets/images/percy-book.jpg
     - assets/images/admin_logo.png
     - assets/images/harry-book.jpg
+    - assets/icons/j-rizz.png
+    - assets/icons/boy-icon.png
+    - assets/icons/girl-icon.png
+    - assets/icons/girl-2.png
+    - assets/icons/reading_book.png
+    - assets/icons/student-boy.png
+    
 
 # flutter:
   fonts:
