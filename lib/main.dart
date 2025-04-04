@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
               .textTheme, // ✅ Merge with dark theme to avoid conflict
         ),
       ),
-      // home: LogBookEaseApp(), // To Login Page
+      // home: const LogBookEaseApp(), // To Login Page
       home: AdminDashboard(), // The main admin dashboard
     );
   }

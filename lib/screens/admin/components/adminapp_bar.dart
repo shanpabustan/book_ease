@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class AppBarWidget extends StatelessWidget {
+class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
-  AppBarWidget({required this.scaffoldKey});
+  const AppBarWidget({required this.scaffoldKey, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -83,4 +83,8 @@ class AppBarWidget extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight); // Define the preferred height for appBar
 }
