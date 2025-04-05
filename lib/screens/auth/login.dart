@@ -6,7 +6,7 @@ import 'multisignup.dart';
 import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';  // Import provider
 import 'package:book_ease/provider/user_data.dart';// Import your UserData provider
-//import 'package:book_ease/screens/admin/admin_dashboard.dart';
+import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
 
 void main() {
   runApp(const LogBookEaseApp());
@@ -23,6 +23,7 @@ class LogBookEaseApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginScreen(),
         '/userDashboard': (context) => const UserDashApp(), // Your user dashboard widget
+        '/adminDashboard': (context) => AdminDashboard(), // Your admin dashboard widget
       },
     );
   }
@@ -93,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
         case "Admin":
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MultiStepSignUpScreen()), // Assuming you have this route
+            MaterialPageRoute(builder: (context) => AdminDashboard()), // Assuming you have this route
           );
           break;
         case "Student":

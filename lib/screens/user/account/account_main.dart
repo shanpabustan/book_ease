@@ -29,6 +29,8 @@ class _AccountScreenState extends State<AccountScreen> {
     'assets/icons/girl-2.png',
     'assets/icons/reading_book.png',
     'assets/icons/student-boy.png',
+    'assets/images/bini.jpg',
+    'assets/images/pulgoso.jpg',
   ];
 
   Future<Map<String, dynamic>> _loadPersonalInfo() async {

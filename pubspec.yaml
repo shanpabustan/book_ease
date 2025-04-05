@@ -21,6 +21,8 @@ dependencies:
   dio: ^5.8.0+1
   provider: ^6.1.4
   file_picker: ^10.0.0
+  fl_chart: ^0.70.2
+  flutter_glow: ^0.3.2
     
 
 dev_dependencies:
@@ -37,6 +39,8 @@ flutter:
     - assets/images/percy-book.jpg
     - assets/images/admin_logo.png
     - assets/images/harry-book.jpg
+    - assets/images/bini.jpg
+    - assets/images/pulgoso.jpg
     - assets/icons/j-rizz.png
     - assets/icons/boy-icon.png
     - assets/icons/girl-icon.png
