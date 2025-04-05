@@ -5,7 +5,7 @@ import 'package:book_ease/screens/auth/login.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';  // Import provider
 import 'package:book_ease/provider/user_data.dart';// Import your UserData provider
-import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
+//import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
 
 const Color secondaryColor = Color.fromRGBO(49, 120, 115, 1);
 void main() async {
