@@ -24,13 +24,16 @@ class SearchAdmin extends StatelessWidget {
         onChanged: onChanged,
         style: const TextStyle(color: Colors.black), // Text color set to black
         decoration: InputDecoration(
+          filled: true, // Set filled to true for background color
+          fillColor: Colors.white, // White background color
           hintText: hintText,
           hintStyle: const TextStyle(
               color: Colors.grey), // Optional: change hint text color
-          prefixIcon: const Icon(Icons.search),
+          prefixIcon:
+              const Icon(Icons.search, color: Colors.grey), // Icon color
           contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
-              vertical: 5), // Adjusted vertical padding to match button
+              vertical: 15), // Adjust vertical padding for better spacing
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide:
@@ -40,6 +43,11 @@ class SearchAdmin extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             borderSide:
                 BorderSide(color: secondaryTextColor), // Focused border color
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide:
+                BorderSide(color: secondaryTextColor), // Enabled border color
           ),
         ),
       ),
