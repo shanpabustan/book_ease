@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class LogoutModal extends StatelessWidget {
+class DeleteDataModal extends StatelessWidget {
   final VoidCallback onCancel;
-  final VoidCallback onLogout;
+  final VoidCallback onDelete;
 
-  const LogoutModal({
+  const DeleteDataModal({
     super.key,
     required this.onCancel,
-    required this.onLogout,
+    required this.onDelete,
   });
 
   @override
@@ -16,7 +16,7 @@ class LogoutModal extends StatelessWidget {
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxWidth: 400, // Set a maximum width for the modal
         ),
         child: Padding(
@@ -29,7 +29,7 @@ class LogoutModal extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Logout',
+                    'Delete Data',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -56,7 +56,7 @@ class LogoutModal extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.logout,
+                      Icons.delete,
                       color: Colors.red,
                       size: 24,
                     ),
@@ -64,7 +64,7 @@ class LogoutModal extends StatelessWidget {
                   const SizedBox(width: 16),
                   const Expanded(
                     child: Text(
-                      'Are you sure you want to log out? You will need to sign in again to access your account.',
+                      'Are you sure you want to delete this data? This action cannot be undone.',
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
@@ -100,7 +100,8 @@ class LogoutModal extends StatelessWidget {
                   const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: () {
-                      onLogout(); // Perform logout logic
+                      onDelete(); // This shows the snackbar or deletes the record
+                      Navigator.pop(context); // Close modal after deletion
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -111,7 +112,7 @@ class LogoutModal extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
-                        'Logout',
+                        'Delete',
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: Colors.white,

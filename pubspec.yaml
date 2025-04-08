@@ -41,10 +41,11 @@ flutter:
     - assets/images/logo-removebg-preview.png
     - assets/images/banner.jpg
     - assets/images/percy-book.jpg
-    - assets/images/admin_logo.png
     - assets/images/lord_p.png
     - assets/images/harry-book.jpg
     - assets/images/lebron.png
+    - assets/images/admin_logo_white.png
+
 
   fonts:
     - family: Poppins

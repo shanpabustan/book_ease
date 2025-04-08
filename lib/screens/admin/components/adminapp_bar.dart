@@ -8,12 +8,12 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4, // Adds shadow for depth
+      elevation: 2, // Reduced the shadow by lowering the elevation
       margin: EdgeInsets.all(10), // Adds spacing around the card
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15), // Rounded corners
       ),
-      color: Colors.white, // 🔹 Background color changed to white
+      color: Colors.white, // Background color changed to white
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Row(

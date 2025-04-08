@@ -6,7 +6,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Flutter for Beginners',
     'author': 'John Doe',
     'year': '2021',
-    'copies': '10',
     'category': 'Programming',
     'condition': 'New'
   },
@@ -15,7 +14,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Dart Essentials',
     'author': 'Jane Doe',
     'year': '2020',
-    'copies': '5',
     'category': 'Programming',
     'condition': 'Used'
   },
@@ -24,7 +22,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Advanced Flutter',
     'author': 'John Smith',
     'year': '2022',
-    'copies': '8',
     'category': 'Programming',
     'condition': 'New'
   },
@@ -33,7 +30,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Data Science with Dart',
     'author': 'Sara Lee',
     'year': '2021',
-    'copies': '3',
     'category': 'Data Science',
     'condition': 'Used'
   },
@@ -42,7 +38,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Introduction to Algorithms',
     'author': 'Jane Smith',
     'year': '2019',
-    'copies': '12',
     'category': 'Computer Science',
     'condition': 'New'
   },
@@ -51,7 +46,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Machine Learning Basics',
     'author': 'Michael Brown',
     'year': '2023',
-    'copies': '7',
     'category': 'Machine Learning',
     'condition': 'Used'
   },
@@ -60,7 +54,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Deep Learning with TensorFlow',
     'author': 'Emma Clark',
     'year': '2023',
-    'copies': '10',
     'category': 'Machine Learning',
     'condition': 'New'
   },
@@ -69,7 +62,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Flutter for Beginners',
     'author': 'John Doe',
     'year': '2021',
-    'copies': '10',
     'category': 'Programming',
     'condition': 'New'
   },
@@ -78,7 +70,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Dart Essentials',
     'author': 'Jane Doe',
     'year': '2020',
-    'copies': '5',
     'category': 'Programming',
     'condition': 'Used'
   },
@@ -87,7 +78,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Advanced Flutter',
     'author': 'John Smith',
     'year': '2022',
-    'copies': '8',
     'category': 'Programming',
     'condition': 'New'
   },
@@ -96,7 +86,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Data Science with Dart',
     'author': 'Sara Lee',
     'year': '2021',
-    'copies': '3',
     'category': 'Data Science',
     'condition': 'Used'
   },
@@ -105,7 +94,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Introduction to Algorithms',
     'author': 'Jane Smith',
     'year': '2019',
-    'copies': '12',
     'category': 'Computer Science',
     'condition': 'New'
   },
@@ -114,7 +102,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Machine Learning Basics',
     'author': 'Michael Brown',
     'year': '2023',
-    'copies': '7',
     'category': 'Machine Learning',
     'condition': 'Used'
   },
@@ -123,7 +110,6 @@ final List<Map<String, String>> bookList = [
     'title': 'Deep Learning with TensorFlow',
     'author': 'Emma Clark',
     'year': '2023',
-    'copies': '10',
     'category': 'Machine Learning',
     'condition': 'New'
   },
