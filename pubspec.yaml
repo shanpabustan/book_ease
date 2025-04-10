@@ -21,6 +21,7 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_glow: ^0.3.2
   fl_chart: ^0.70.2
+  file_picker: ^10.0.0
 
 dev_dependencies:
   flutter_test:
@@ -34,10 +35,11 @@ flutter:
     - assets/images/logo-removebg-preview.png
     - assets/images/banner.jpg
     - assets/images/percy-book.jpg
-    - assets/images/admin_logo.png
     - assets/images/lord_p.png
     - assets/images/harry-book.jpg
     - assets/images/lebron.png
+    - assets/images/admin_logo_white.png
+
 
 # flutter:
   fonts:

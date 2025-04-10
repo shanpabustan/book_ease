@@ -9,17 +9,30 @@ const Color secondaryColor = Color.fromRGBO(49, 120, 115, 1);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await requestPermissions(); // Request permissions before running the app
-
+  await requestPermissions(); // ✅ Request permissions before running the app
   runApp(const MyApp());
 }
 
+// ✅ Request relevant permissions based on platform
 Future<void> requestPermissions() async {
-  // Avoid permission requests on the web
-  if (!kIsWeb) {
-    // If not running on web
-    await Permission.camera.request();
-    await Permission.photos.request();
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
+    // ✅ Android 13+ requires separate media permissions
+    if (await Permission.photos.isDenied ||
+        await Permission.photos.isPermanentlyDenied) {
+      await Permission.photos.request();
+    }
+    if (await Permission.camera.isDenied ||
+        await Permission.camera.isPermanentlyDenied) {
+      await Permission.camera.request();
+    }
+
+    // ✅ Optionally include storage permission for older Android versions
+    if (await Permission.storage.isDenied ||
+        await Permission.storage.isPermanentlyDenied) {
+      await Permission.storage.request();
+    }
   }
 }
 
@@ -33,18 +46,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: secondaryColor,
         textTheme: GoogleFonts.poppinsTextTheme(
-          ThemeData.light()
-              .textTheme, // ✅ Explicitly merging with default text theme
+          ThemeData.light().textTheme,
         ),
       ),
-      darkTheme: ThemeData.dark().copyWith(
-        textTheme: GoogleFonts.poppinsTextTheme(
-          ThemeData.dark()
-              .textTheme, // ✅ Merge with dark theme to avoid conflict
-        ),
-      ),
-      // home: const LogBookEaseApp(), // To Login Page
-      home: AdminDashboard(), // The main admin dashboard
+      home: AdminDashboard(), // ✅ Set your initial screen here
     );
   }
 }

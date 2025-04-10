@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../components/sidebar.dart';
 import '../components/adminapp_bar.dart';
 import '../calendar/calendar_main.dart';
-import '../managebook/manage_books.dart';
+import '../managebook/manage_books_index.dart';
 import '../reservation/reservation_main.dart';
-import '../usermanagement/manage_user.dart';
-import '../usermanagement/barrowed_book.dart';
+import '../usermanagement/manage_user_index.dart';
+import '../barrowed_books/barrowed_book.dart';
 import 'stats_section.dart';
 import 'analytics.dart';
 import 'most_borrowed.dart';
@@ -14,7 +14,8 @@ class DashboardTheme {
   static const Color primaryTextColor = Colors.black87;
   static const Color secondaryTextColor = Colors.grey;
   static const Color cardBackground = Colors.white;
-  static const Color pageBackground = Color(0xFFFAF7F0);
+  // static const Color pageBackground = Color(0xFFFAF7F0);
+  static const Color pageBackground = Colors.white;
 }
 
 class AdminDashboard extends StatefulWidget {
@@ -53,8 +54,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         children: [
           if (MediaQuery.of(context).size.width > 800)
             Sidebar(
-              isExpanded: isSidebarExpanded,
-              onToggle: toggleSidebar,
               selectedIndex: _selectedIndex,
               onItemSelected: _handleNavigation,
             ),

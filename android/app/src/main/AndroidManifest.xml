@@ -1,28 +1,24 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.book_ease">
 
-    <!-- ✅ Required permissions for Bluetooth, Audio, and Internet -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- ✅ Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
-    <!-- ✅ Required permissions for Camera and Storage -->
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
-    <!-- ✅ For Android 10 and above (Scoped Storage) -->
-    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
-
-    <!-- ✅ For Android 13 and above -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-
     <application
-        android:label="book_ease"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:label="book_ease"
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"> <!-- ✅ This line is essential -->
 
         <activity
             android:name=".MainActivity"
@@ -35,8 +31,8 @@
             android:windowSoftInputMode="adjustResize">
 
             <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"/>
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -44,30 +40,25 @@
             </intent-filter>
         </activity>
 
-        <!-- ✅ Don't delete the Flutter meta-data -->
+        <!-- ✅ Flutter meta-data -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
 
     </application>
 
-    <!-- ✅ Required for speech recognition -->
+    <!-- ✅ Queries for Android 11+ -->
     <queries>
         <intent>
             <action android:name="android.speech.RecognitionService" />
         </intent>
-
-        <!-- ✅ Required for text processing -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
-
-        <!-- ✅ Required for Camera Capture -->
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
-
     </queries>
 
 </manifest>

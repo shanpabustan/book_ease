@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_glow/flutter_glow.dart';
 import 'package:book_ease/modals/logout_modal.dart';
+import 'package:book_ease/screens/admin/admin_theme.dart';
 
 class Sidebar extends StatefulWidget {
-  final bool isExpanded;
-  final VoidCallback onToggle;
   final int selectedIndex;
   final Function(int) onItemSelected;
 
   const Sidebar({
     super.key,
-    required this.isExpanded,
-    required this.onToggle,
     required this.selectedIndex,
     required this.onItemSelected,
   });
@@ -22,39 +19,15 @@ class Sidebar extends StatefulWidget {
 
 class _SidebarState extends State<Sidebar> {
   int _hoverIndex = -1;
-  bool _isArrowHovered = false;
-  bool _canShowText = false;
+  bool _isHovered = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _canShowText = widget.isExpanded;
-  }
-
-  @override
-  void didUpdateWidget(covariant Sidebar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isExpanded && !_canShowText) {
-      Future.delayed(const Duration(milliseconds: 250), () {
-        if (mounted && widget.isExpanded) {
-          setState(() => _canShowText = true);
-        }
-      });
-    } else if (!widget.isExpanded) {
-      setState(() => _canShowText = false);
-    }
-  }
-
-  void _handleLogout(BuildContext context) {
+  void showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => LogoutModal(
-        onCancel: () {
-          Navigator.pop(context); // Close the dialog
-        },
+        onCancel: () => Navigator.pop(context),
         onLogout: () {
-          Navigator.pop(context); // Close the dialog
-          // TODO: Add your logout logic here
+          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Logged out successfully.")),
           );
@@ -64,8 +37,15 @@ class _SidebarState extends State<Sidebar> {
   }
 
   Widget _buildMenuItem(IconData icon, String title, int index) {
-    bool isHovered = _hoverIndex == index;
-    bool isSelected = index != 99 && widget.selectedIndex == index;
+    final isHovered = _hoverIndex == index;
+    final isSelected = widget.selectedIndex == index;
+    final showText = _isHovered;
+
+    // Default color when not hovered
+    Color iconColor = Color.fromRGBO(212, 216, 220, 1); // #9AA6B2
+    if (isHovered || isSelected) {
+      iconColor = Colors.white;
+    }
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hoverIndex = index),
@@ -73,49 +53,49 @@ class _SidebarState extends State<Sidebar> {
       child: GestureDetector(
         onTap: () {
           if (index == 99) {
-            _handleLogout(context);
+            showLogoutDialog(context);
           } else {
             widget.onItemSelected(index);
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
           child: GlowContainer(
-            glowColor:
-                isSelected ? const Color(0xFF77B254) : Colors.transparent,
+            glowColor: isSelected
+                ? AdminColor.secondaryBackgroundColor
+                : Colors.transparent,
             blurRadius: isSelected ? 10 : 0,
             borderRadius: BorderRadius.circular(8.0),
-            color: isSelected ? const Color(0xFF77B254) : Colors.transparent,
+            color: isSelected
+                ? AdminColor.secondaryBackgroundColor
+                : Colors.transparent,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.only(left: 12, top: 10, bottom: 10),
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
                 color: isHovered || isSelected
-                    ? const Color(0xFF77B254)
+                    ? AdminColor.secondaryBackgroundColor
                     : Colors.transparent,
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Icon(
-                    icon,
-                    size: 24,
-                    color: Colors.white,
-                  ),
-                  if (widget.isExpanded && _canShowText) ...[
-                    const SizedBox(width: 10),
-                    AnimatedOpacity(
-                      opacity: _canShowText ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 150),
+                  Icon(icon, size: 24, color: iconColor),
+                  const SizedBox(width: 10),
+                  if (showText)
+                    Flexible(
                       child: Text(
                         title,
-                        style: const TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        softWrap: false,
+                        style: TextStyle(
                           fontSize: 14,
-                          color: Colors.white,
+                          color: iconColor, // Same color as the icon
                         ),
                       ),
                     ),
-                  ],
                 ],
               ),
             ),
@@ -127,81 +107,61 @@ class _SidebarState extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          width: widget.isExpanded ? 220 : 70,
-          color: const Color(0xFF2A3335),
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                child: Row(
-                  children: [
-                    // Use Image.asset to display the logo
-                    Image.asset(
-                      'assets/images/admin_logo.png',
-                      width: 40,
-                      height: 40,
-                    ),
-                    if (widget.isExpanded && _canShowText) ...[
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Admin Panel',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildMenuItem(Icons.dashboard, 'Dashboard', 0),
-                    _buildMenuItem(Icons.menu_book, 'Manage Books', 1),
-                    _buildMenuItem(Icons.people, 'User Management', 2),
-                    _buildMenuItem(Icons.event, 'Reservations', 3),
-                    _buildMenuItem(Icons.calendar_today, 'Calendar', 4),
-                    _buildMenuItem(Icons.bookmark, 'Borrowed Books', 5),
-                  ],
-                ),
-              ),
-              const Divider(color: Colors.white54),
-              _buildMenuItem(Icons.logout, 'Logout', 99),
-              const SizedBox(height: 10),
-            ],
-          ),
+    final sidebarWidth =
+        _isHovered ? 218.0 : 70.0; // Adjusted to prevent overflow
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: sidebarWidth,
+        color: AdminColor.sidebarBackgroundColor,
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildMenuItems(),
+            _buildMenuItem(Icons.logout, 'Logout', 99),
+            const SizedBox(height: 10),
+          ],
         ),
-        Positioned(
-          top: MediaQuery.of(context).size.height / 2 - 20,
-          right: -8,
-          child: MouseRegion(
-            onEnter: (_) => setState(() => _isArrowHovered = true),
-            onExit: (_) => setState(() => _isArrowHovered = false),
-            child: GestureDetector(
-              onTap: widget.onToggle,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: _isArrowHovered ? 1.0 : 0.5,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey[700],
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    widget.isExpanded ? Icons.arrow_back : Icons.arrow_forward,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-              ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      child: Center(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: _isHovered ? 80 : 50,
+          height: _isHovered ? 80 : 50,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/images/admin_logo_white.png',
+              fit: BoxFit.cover,
             ),
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItems() {
+    return Expanded(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          _buildMenuItem(Icons.dashboard, 'Dashboard', 0),
+          _buildMenuItem(Icons.menu_book, 'Manage Books', 1),
+          _buildMenuItem(Icons.people, 'User Management', 2),
+          _buildMenuItem(Icons.event, 'Reservations', 3),
+          _buildMenuItem(Icons.calendar_today, 'Calendar', 4),
+          _buildMenuItem(Icons.bookmark, 'Borrowed Books', 5),
+        ],
+      ),
     );
   }
 }
