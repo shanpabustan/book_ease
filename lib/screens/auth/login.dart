@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
         case "Admin":
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => AdminDashboard()), // Assuming you have this route
+            MaterialPageRoute(builder: (context) =>AdminDashboard()), // Assuming you have this route
           );
           break;
         case "Student":

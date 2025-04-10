@@ -78,7 +78,7 @@ class TopBookCategoryBorrowData {
   // Function to dynamically assign colors to bars based on the index
   static Color _getCategoryColor(int index) {
     List<Color> barColors = [
-      Colors.blue,
+      const Color.fromARGB(255, 34, 136, 219),
       Colors.green,
       Colors.orange,
       Colors.red,

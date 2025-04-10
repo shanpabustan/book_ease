@@ -1,230 +1,400 @@
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import this to use FilteringTextInputFormatter
+import 'package:permission_handler/permission_handler.dart';
+import 'package:book_ease/widgets/admin_buttons_widget.dart'; // Importing CustomButton
+import 'package:book_ease/screens/admin/admin_theme.dart';
+import 'package:dio/dio.dart';
 
 class AddBookForm extends StatefulWidget {
   const AddBookForm({Key? key}) : super(key: key);
 
   @override
-  _AddBookFormState createState() => _AddBookFormState();
+  State<AddBookForm> createState() => _AddBookFormState();
 }
 
 class _AddBookFormState extends State<AddBookForm> {
   final _formKey = GlobalKey<FormState>();
+
+  // Controllers
   final TextEditingController _bookIdController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
+  final TextEditingController _yearController = TextEditingController();
+  final TextEditingController _versionController = TextEditingController();
   final TextEditingController _isbnController = TextEditingController();
-  final TextEditingController _librarySectionController =
-      TextEditingController();
+  final TextEditingController _totalCopiesController = TextEditingController();
+  final TextEditingController _sectionController = TextEditingController();
   final TextEditingController _shelfLocationController =
       TextEditingController();
-  final TextEditingController _totalCopiesController = TextEditingController();
-  final TextEditingController _availableCopiesController =
-      TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   String? _selectedCategory;
   String? _selectedCondition;
-  File? _selectedImage;
+  File? _pickedImage;
+   Uint8List? _webImageBytes;
 
-  final List<String> _categories = [
-    "Information System",
-    "Computer Science",
-    "Engineering",
-    "Mathematics",
-    "Literature",
+  final List<String> categories = [
+    'Information System',
+    'Computer Science',
+    'Engineering',
+    'Mathematics'
   ];
 
-  final List<String> _conditions = ["New", "Good", "Fair", "Damaged"];
+  final List<String> conditions = ['New', 'Used'];
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  // Method to pick an image
+  void _pickImage() async {
+    if (!kIsWeb) {
+      // Check for permissions explicitly
+      var status = await Permission.photos.request();
+      if (!status.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo permission is not granted')),
+        );
+        return;
+      }
+    }
+
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (result != null && result.files.single.path != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        if (result != null) {
+            if (kIsWeb) {
+              setState(() {
+                _webImageBytes = result.files.single.bytes;
+                _pickedImage = File(''); // Dummy to show something is picked
+              });
+            } else {
+              setState(() {
+                _pickedImage = File(result.files.single.path!);
+              });
+            }
+          }
       });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No image selected.')),
+      );
     }
   }
 
-  void _saveBook() {
-    if (_formKey.currentState!.validate()) {
-      print("Saving book...");
+  // Clear all form fields
+  void _clearAll() {
+    _formKey.currentState?.reset();
+    _bookIdController.clear();
+    _titleController.clear();
+    _authorController.clear();
+    _yearController.clear();
+    _versionController.clear();
+    _isbnController.clear();
+    _totalCopiesController.clear();
+    _sectionController.clear();
+    _shelfLocationController.clear();
+    _descriptionController.clear();
+    _pickedImage = null;
+    setState(() {
+      _selectedCategory = null;
+      _selectedCondition = null;
+    });
+  }
+
+void _saveForm() async {
+  if (_formKey.currentState!.validate()) {
+    if (_pickedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please upload an image')),
+      );
+      return;
+    }
+
+    try {
+      final bytes = kIsWeb
+    ? _webImageBytes!
+    : await _pickedImage!.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      final bookData = {
+        'book_id': int.parse(_bookIdController.text),
+        'title': _titleController.text,
+        'author': _authorController.text,
+        'category': _selectedCategory,
+        'isbn': _isbnController.text,
+        'library_section': _sectionController.text,
+        'shelf_location': _shelfLocationController.text,
+        'total_copies': int.parse(_totalCopiesController.text),
+        'available_copies': int.parse(_totalCopiesController.text),
+        'book_condition': _selectedCondition,
+        'picture': base64Image,
+        'year_published': int.parse(_yearController.text),
+        'version': int.parse(_versionController.text),
+        'description': _descriptionController.text,
+      };
+
+      final dio = Dio();
+      final response = await dio.post(
+        'http://127.0.0.1:5566/admin/add-book', // 🔁 Replace with your actual API URL
+        data: bookData,
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['retCode'] == '200') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Book added successfully')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add book: ${response.data['message']}')),
+        );
+      }
+    } catch (e) {
+      print('Error during book submission: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error adding book. Please try again.')),
+      );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Add New Book"),
-        backgroundColor: Colors.blueGrey[700],
-      ),
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
+    return Dialog(
+      insetPadding: const EdgeInsets.all(24),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: const Text(
+            'Add Book',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: AdminFontSize
+                  .heading, // You can change 20 to your desired font size
+            ),
+          ),
+          centerTitle: true,
+          leading: IconButton(
+            icon: CircleAvatar(
+              backgroundColor: AdminColor.secondaryBackgroundColor,
+              child: const Icon(Icons.close, color: Colors.white),
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: SingleChildScrollView(
+          // Make the entire form scrollable
           child: Form(
             key: _formKey,
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: _pickImage,
-                            child: _selectedImage == null
-                                ? Container(
-                                    width: 150,
-                                    height: 200,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Center(
-                                        child: Text("Upload Image")),
-                                  )
-                                : Image.file(
-                                    _selectedImage!,
-                                    width: 150,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                  ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // LEFT COLUMN
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap:
+                              _pickImage, // Call the _pickImage function here
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text('Upload Image'),
+                                const SizedBox(height: 12),
+                                _pickedImage != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: kIsWeb
+                                              ? (_webImageBytes != null
+                                                  ? Image.memory(
+                                                      _webImageBytes!,
+                                                      height: 160,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : const Icon(Icons.image, size: 100, color: Colors.grey))
+                                              : Image.file(
+                                                  _pickedImage!,
+                                                  height: 160,
+                                                  fit: BoxFit.cover,
+                                                )
+                                      )
+                                    : const Icon(Icons.image,
+                                        size: 100, color: Colors.grey),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 20),
-                          DropdownButtonFormField<String>(
-                            value: _selectedCategory,
-                            decoration:
-                                const InputDecoration(labelText: "Category"),
-                            items: _categories.map((String category) {
-                              return DropdownMenuItem(
-                                  value: category, child: Text(category));
-                            }).toList(),
-                            onChanged: (value) =>
-                                setState(() => _selectedCategory = value),
-                            validator: (value) =>
-                                value == null ? "Select a category" : null,
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _selectedCategory,
+                          items: categories
+                              .map((cat) => DropdownMenuItem(
+                                  value: cat, child: Text(cat)))
+                              .toList(),
+                          decoration: InputDecoration(
+                            labelText: 'Category',
+                            floatingLabelStyle: const TextStyle(
+                                color: AdminColor.secondaryBackgroundColor),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AdminColor.secondaryBackgroundColor),
+                            ),
+                            border: const OutlineInputBorder(),
                           ),
-                        ],
-                      ),
+                          onChanged: (value) =>
+                              setState(() => _selectedCategory = value),
+                          validator: (value) =>
+                              value == null ? 'Category is required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _selectedCondition,
+                          items: conditions
+                              .map((cond) => DropdownMenuItem(
+                                  value: cond, child: Text(cond)))
+                              .toList(),
+                          decoration: InputDecoration(
+                            labelText: 'Book Condition',
+                            floatingLabelStyle: const TextStyle(
+                                color: AdminColor.secondaryBackgroundColor),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AdminColor.secondaryBackgroundColor),
+                            ),
+                            border: const OutlineInputBorder(),
+                          ),
+                          onChanged: (value) =>
+                              setState(() => _selectedCondition = value),
+                          validator: (value) =>
+                              value == null ? 'Condition is required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _descriptionController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            hintText: 'Write here...',
+                            floatingLabelStyle: const TextStyle(
+                                color: AdminColor.secondaryBackgroundColor),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AdminColor.secondaryBackgroundColor),
+                            ),
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Description is required'
+                              : null,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      flex: 3,
+                  ),
+                  const SizedBox(width: 32),
+                  // RIGHT COLUMN
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextFormField(
-                            controller: _bookIdController,
-                            decoration:
-                                const InputDecoration(labelText: "Book ID"),
-                            validator: (value) =>
-                                value!.isEmpty ? "Book ID is required" : null,
+                          const Text('Information',
+                              style: TextStyle(
+                                  fontSize: AdminFontSize.subHeading,
+                                  fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 16),
+                          BookTextField(
+                              label: 'Book ID',
+                              controller: _bookIdController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                          BookTextField(
+                              label: 'Title', controller: _titleController),
+                          BookTextField(
+                              label: 'Author', controller: _authorController),
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: BookTextField(
+                                      label: 'Year Published',
+                                      controller: _yearController,
+                                      inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ])),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                  child: BookTextField(
+                                      label: 'Version',
+                                      controller: _versionController,
+                                      inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ])),
+                            ],
                           ),
-                          TextFormField(
-                            controller: _titleController,
-                            decoration:
-                                const InputDecoration(labelText: "Title"),
-                            validator: (value) =>
-                                value!.isEmpty ? "Title is required" : null,
-                          ),
-                          TextFormField(
-                            controller: _authorController,
-                            decoration:
-                                const InputDecoration(labelText: "Author"),
-                            validator: (value) =>
-                                value!.isEmpty ? "Author is required" : null,
-                          ),
-                          TextFormField(
-                            controller: _isbnController,
-                            decoration:
-                                const InputDecoration(labelText: "ISBN"),
-                            validator: (value) =>
-                                value!.isEmpty ? "ISBN is required" : null,
-                          ),
-                          TextFormField(
-                            controller: _librarySectionController,
-                            decoration: const InputDecoration(
-                                labelText: "Library Section"),
-                            validator: (value) => value!.isEmpty
-                                ? "Library Section is required"
-                                : null,
-                          ),
-                          TextFormField(
-                            controller: _shelfLocationController,
-                            decoration: const InputDecoration(
-                                labelText: "Shelf Location"),
-                            validator: (value) => value!.isEmpty
-                                ? "Shelf Location is required"
-                                : null,
-                          ),
-                          TextFormField(
-                            controller: _totalCopiesController,
-                            decoration: const InputDecoration(
-                                labelText: "Total Copies"),
-                            keyboardType: TextInputType.number,
-                            validator: (value) => value!.isEmpty
-                                ? "Total Copies is required"
-                                : null,
-                          ),
-                          TextFormField(
-                            controller: _availableCopiesController,
-                            decoration: const InputDecoration(
-                                labelText: "Available Copies"),
-                            keyboardType: TextInputType.number,
-                            validator: (value) => value!.isEmpty
-                                ? "Available Copies is required"
-                                : null,
-                          ),
-                          DropdownButtonFormField<String>(
-                            value: _selectedCondition,
-                            decoration:
-                                const InputDecoration(labelText: "Condition"),
-                            items: _conditions.map((String condition) {
-                              return DropdownMenuItem(
-                                  value: condition, child: Text(condition));
-                            }).toList(),
-                            onChanged: (value) =>
-                                setState(() => _selectedCondition = value),
-                            validator: (value) =>
-                                value == null ? "Select a condition" : null,
-                          ),
+                          BookTextField(
+                              label: 'ISBN', controller: _isbnController),
+                          BookTextField(
+                              label: 'Total Copies',
+                              controller: _totalCopiesController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                          BookTextField(
+                              label: 'Library Section',
+                              controller: _sectionController),
+                          BookTextField(
+                              label: 'Shelf Location',
+                              controller: _shelfLocationController),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              CustomButton(
+                                text: 'Clear All',
+                                onPressed: _clearAll,
+                                backgroundColor: Colors.white,
+                                textColor: Colors.black,
+                              ),
+                              const SizedBox(width: 12),
+                              CustomButton(
+                                text: 'Save',
+                                onPressed: _saveForm,
+                                backgroundColor:
+                                    AdminColor.secondaryBackgroundColor,
+                                textColor: Colors.white,
+                              ),
+                            ],
+                          )
                         ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        _formKey.currentState?.reset();
-                        setState(() {
-                          _selectedCategory = null;
-                          _selectedCondition = null;
-                          _selectedImage = null;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey),
-                      child: const Text("Clear All"),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: _saveBook,
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                      child: const Text("Save"),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -232,3 +402,39 @@ class _AddBookFormState extends State<AddBookForm> {
     );
   }
 }
+
+          class BookTextField extends StatelessWidget {
+            final String label;
+            final TextEditingController controller;
+            final List<TextInputFormatter>? inputFormatters;
+
+            const BookTextField({
+              required this.label,
+              required this.controller,
+              this.inputFormatters,
+              super.key,
+            });
+
+            @override
+            Widget build(BuildContext context) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: TextFormField(
+                  controller: controller,
+                  inputFormatters: inputFormatters,
+                  decoration: InputDecoration(
+                    labelText: label,
+                    floatingLabelStyle: const TextStyle(
+                        color: AdminColor.secondaryBackgroundColor), // Added this line
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: AdminColor.secondaryBackgroundColor), // Added this line
+                    ),
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? '$label is required' : null,
+                ),
+              );
+            }
+          }

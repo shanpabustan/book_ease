@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'dashboard_screen.dart'; // Import the theme from the existing file
 
 class MostBorrowedBooks extends StatelessWidget {
-  final List<String> books = [
-    'Intermediate Accounting',
-    'JAVA Programming',
-    'The Business of Tourism',
-    'Python Programming',
-    'Artificial Intelligence Basics',
-    'Data Structures & Algorithms',
-    'Marketing Strategies',
-    'Modern Web Development',
-    'Database Management Systems',
-    'Cybersecurity Fundamentals',
+  final List<Map<String, String>> books = [
+    {
+      'title': 'Intermediate Accounting',
+      'image': 'assets/images/percy-book.jpg'
+    },
+    {'title': 'JAVA Programming', 'image': 'assets/images/percy-book.jpg'},
+    {
+      'title': 'The Business of Tourism',
+      'image': 'assets/images/percy-book.jpg'
+    },
+    {'title': 'Python Programming', 'image': 'assets/images/percy-book.jpg'},
+    {
+      'title': 'Artificial Intelligence Basics',
+      'image': 'assets/images/percy-book.jpg'
+    },
   ];
 
   @override
@@ -44,12 +48,29 @@ class MostBorrowedBooks extends StatelessWidget {
                   .entries
                   .map((entry) => Padding(
                         padding: EdgeInsets.symmetric(vertical: 5),
-                        child: Text(
-                          '${entry.key + 1}. ${entry.value}', // Auto-numbering
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: DashboardTheme.secondaryTextColor,
-                          ),
+                        child: Row(
+                          children: [
+                            // Image with design
+                            ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(8), // Rounded corners
+                              child: Image.asset(
+                                entry.value['image']!,
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            SizedBox(width: 15),
+                            // Book Title
+                            Text(
+                              '${entry.key + 1}. ${entry.value['title']}', // Auto-numbering
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: DashboardTheme.secondaryTextColor,
+                              ),
+                            ),
+                          ],
                         ),
                       ))
                   .toList(),

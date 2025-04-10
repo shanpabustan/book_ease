@@ -1,8 +1,48 @@
 // stats_section.dart
 import 'package:flutter/material.dart';
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart'; // Adjust this import based on your file structure
+import 'package:dio/dio.dart';
 
-class StatsSection extends StatelessWidget {
+
+
+
+class StatsSection extends StatefulWidget {
+  @override
+  _StatsSectionState createState() => _StatsSectionState();
+}
+
+class _StatsSectionState extends State<StatsSection> {
+  int studentCount = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadStudentCount();
+  }
+
+  Future<void> loadStudentCount() async {
+    int count = await fetchStudentCount();
+    setState(() {
+      studentCount = count;
+      isLoading = false;
+    });
+  }
+
+  Future<int> fetchStudentCount() async {
+    try {
+      final response = await Dio().get('http://127.0.0.1:5566/admin/count');
+      if (response.statusCode == 200 && response.data['retCode'] == "200") {
+        return response.data['data']; // Assumes response.data['data'] is an int
+      } else {
+        throw Exception('Failed to fetch student count');
+      }
+    } catch (e) {
+      print('Error fetching student count: $e');
+      return 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -13,7 +53,7 @@ class StatsSection extends StatelessWidget {
           Expanded(
             child: StatCard(
               title: 'Registered Users',
-              value: '1030',
+              value: isLoading ? '...' : studentCount.toString(),
               icon: Icons.person,
               borderColor: Colors.blueAccent,
               iconBgColor: Colors.blue[200]!,
@@ -23,7 +63,7 @@ class StatsSection extends StatelessWidget {
           Expanded(
             child: StatCard(
               title: 'Borrowed Books',
-              value: '3054',
+              value: 'Pishan', // Placeholder
               icon: Icons.book,
               borderColor: Colors.greenAccent,
               iconBgColor: Colors.green[200]!,
@@ -33,7 +73,7 @@ class StatsSection extends StatelessWidget {
           Expanded(
             child: StatCard(
               title: 'Reservations',
-              value: '2051',
+              value: 'Nemeeen', // Placeholder
               icon: Icons.event,
               borderColor: Colors.orangeAccent,
               iconBgColor: Colors.orange[200]!,
@@ -43,7 +83,7 @@ class StatsSection extends StatelessWidget {
           Expanded(
             child: StatCard(
               title: 'Overdue Books',
-              value: '20',
+              value: 'Pishan', // Placeholder
               icon: Icons.warning,
               borderColor: Colors.redAccent,
               iconBgColor: Colors.red[200]!,
