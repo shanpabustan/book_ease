@@ -1,13 +1,19 @@
+import 'package:book_ease/screens/admin/usermanagement/view_user.dart';
 import 'package:flutter/material.dart';
 import 'user_data.dart'; // Reusable user data source
-import 'package:book_ease/modals/delete_modal.dart'; // Import DeactivateAccountModal
+import 'package:book_ease/modals/unblock_data_modal.dart'; // Import DeactivateAccountModal
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts package
 
 class UserManagementApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: UserManagementScreen(),
+      theme: ThemeData(
+        textTheme:
+            GoogleFonts.poppinsTextTheme(), // Apply Poppins font globally
+      ),
+      home: const UserManagementScreen(),
     );
   }
 }
@@ -37,6 +43,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     selectedRows = List.generate(users.length, (_) => false);
   }
 
+  // Pagination helper: Divide the users into pages
   List<List<Map<String, String>>> get paginatedUsers {
     List<List<Map<String, String>>> chunks = [];
     for (int i = 0; i < users.length; i += rowsPerPage) {
@@ -46,6 +53,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     return chunks;
   }
 
+  // Sorting functionality
   void _sort<T>(Comparable<T> Function(Map<String, String> d) getField,
       int columnIndex, bool ascending) {
     users.sort((a, b) {
@@ -61,6 +69,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     });
   }
 
+  // Toggle select all rows
   void _toggleSelectAll(bool? value) {
     setState(() {
       isAllSelected = value ?? false;
@@ -75,6 +84,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     });
   }
 
+  // Toggle individual row selection
   void _toggleRowSelection(bool? value, int index) {
     setState(() {
       int actualIndex = currentPage * rowsPerPage + index;
@@ -84,10 +94,12 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     });
   }
 
+  // Check if any rows are selected to enable action buttons
   void _checkButtonState() {
     isButtonEnabled = selectedRows.any((isSelected) => isSelected);
   }
 
+  // Check if all rows in the current page are selected
   void _checkSelectAllState() {
     int start = currentPage * rowsPerPage;
     int end = (start + rowsPerPage > users.length)
@@ -97,6 +109,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         selectedRows.sublist(start, end).every((selected) => selected);
   }
 
+  // Navigate to the next page
   void _nextPage() {
     if (currentPage < paginatedUsers.length - 1) {
       setState(() {
@@ -107,6 +120,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     }
   }
 
+  // Navigate to the previous page
   void _previousPage() {
     if (currentPage > 0) {
       setState(() {
@@ -115,23 +129,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         _checkButtonState();
       });
     }
-  }
-
-  void _showDeleteModal() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return DeleteDataModal(
-          onCancel: () => Navigator.pop(context),
-          onDelete: () {
-            // Perform delete logic here
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Data deleted')),
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -149,16 +146,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 _buildActionButton(Icons.picture_as_pdf, 'PDF', Colors.blue,
                     enable: isButtonEnabled),
                 const SizedBox(width: 16),
-                _buildActionButton(
-                    Icons.table_chart, 'Spreadsheet', Colors.green,
+                _buildActionButton(Icons.file_copy, 'Excel', Colors.green,
                     enable: isButtonEnabled),
-                const SizedBox(width: 16),
-                _buildActionButton(Icons.delete, 'Delete', Colors.red,
-                    onPressed: _showDeleteModal, enable: isButtonEnabled),
                 const Spacer(),
               ],
             ),
-
             const SizedBox(height: 16),
 
             // DataTable
@@ -169,7 +161,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   sortColumnIndex: sortColumnIndex,
                   sortAscending: ascending,
                   headingRowColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.grey.shade200),
+                    (states) => const Color.fromRGBO(212, 236, 234, 1),
+                  ),
                   columns: [
                     DataColumn(
                       label: Checkbox(
@@ -190,17 +183,12 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       onSort: (i, asc) => _sort((d) => d['email']!, i, asc),
                     ),
                     DataColumn(
-                      label: _buildSortableColumnLabel('Program'),
-                      onSort: (i, asc) => _sort((d) => d['program']!, i, asc),
+                      label: _buildSortableColumnLabel('Course'),
+                      onSort: (i, asc) => _sort((d) => d['course']!, i, asc),
                     ),
                     DataColumn(
-                      label: _buildSortableColumnLabel('Year Level'),
-                      onSort: (i, asc) => _sort((d) => d['yearLevel']!, i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Contact Number'),
-                      onSort: (i, asc) =>
-                          _sort((d) => d['contactNumber']!, i, asc),
+                      label: _buildSortableColumnLabel('Status'),
+                      onSort: (i, asc) => _sort((d) => d['status']!, i, asc),
                     ),
                     const DataColumn(
                       label: Text(
@@ -213,70 +201,70 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       List<DataRow>.generate(currentPageUsers.length, (index) {
                     final user = currentPageUsers[index];
                     int actualIndex = currentPage * rowsPerPage + index;
-                    return DataRow(cells: [
-                      DataCell(Checkbox(
-                        value: selectedRows[actualIndex],
-                        onChanged: (val) => _toggleRowSelection(val, index),
-                      )),
-                      DataCell(Text(user['userId']!)),
-                      DataCell(SizedBox(
-                        width: 150,
-                        child: Text(
-                          user['name']!,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
+
+                    final isEvenRow = index % 2 == 0;
+
+                    return DataRow(
+                        color: MaterialStateProperty.resolveWith<Color?>(
+                          (states) => isEvenRow
+                              ? Colors.transparent
+                              : Colors.grey.shade100,
                         ),
-                      )),
-                      DataCell(SizedBox(
-                        width: 150,
-                        child: Text(
-                          user['email']!,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                      )),
-                      DataCell(Text(user['program']!)),
-                      DataCell(Text(user['yearLevel']!)),
-                      DataCell(Text(user['contactNumber']!)),
-                      DataCell(Row(
-                        children: [
-                          Tooltip(
-                            message: 'View User',
-                            child: IconButton(
-                              icon: const Icon(Icons.remove_red_eye_outlined,
-                                  size: 20),
-                              onPressed: () {
-                                // TODO: Add view logic
-                              },
+                        cells: [
+                          DataCell(Checkbox(
+                            value: selectedRows[actualIndex],
+                            onChanged: (val) => _toggleRowSelection(val, index),
+                          )),
+                          DataCell(Text(user['userId']!)),
+                          DataCell(SizedBox(
+                            width: 150,
+                            child: Text(
+                              user['name']!,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Edit User',
-                            child: IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 20),
-                              onPressed: () {
-                                // TODO: Add edit logic
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Delete User',
-                            child: IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 20),
-                              onPressed: _showDeleteModal,
-                            ),
-                          ),
-                        ],
-                      )),
-                    ]);
+                          )),
+                          DataCell(Text(user['email']!)),
+                          DataCell(Text(user['course']!)),
+                          DataCell(_buildStatusChip(user['status']!)),
+                          DataCell(Row(
+                            children: [
+                              Tooltip(
+                                message: 'View User',
+                                child: IconButton(
+                                  icon: const Icon(
+                                      Icons.remove_red_eye_outlined,
+                                      size: 20),
+                                  onPressed: () {
+                                    // Pass the book data to the ViewBookModal
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return ViewUserModal(user: user);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Tooltip(
+                                message: 'Unblock User', // Changed the message
+                                child: IconButton(
+                                  icon: const Icon(Icons.lock_open,
+                                      size: 20), // Changed to unblock icon
+                                  onPressed:
+                                      _showUnblockModal, // Changed to unblock modal
+                                ),
+                              ),
+                            ],
+                          )),
+                        ]);
                   }),
                 ),
               ),
             ),
 
-            // Pagination
+            // Pagination controls
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -317,6 +305,44 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
+  // Show unblock modal for user account unblocking
+  void _showUnblockModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return UnblockDataModal(
+          onCancel: () => Navigator.pop(context),
+          onUnblock: () {
+            // Perform unblock logic here
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('User unblocked')),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Helper function to create Status Chip
+  Widget _buildStatusChip(String status) {
+    // Green for 'Active' and Red for 'Blocked'
+    final color = status == 'Active' ? Colors.green : Colors.red;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2), // Lightened background for readability
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: color, // Text color matches the status color
+        ),
+      ),
+    );
+  }
+
+  // Helper function to create action buttons with icons
   Widget _buildActionButton(IconData icon, String label, Color color,
       {VoidCallback? onPressed, bool enable = true}) {
     return OutlinedButton.icon(
@@ -329,10 +355,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: enable ? color : Colors.grey),
         backgroundColor: enable ? null : Colors.grey[300],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4), // Reduce border radius
+        ),
       ),
     );
   }
 
+  // Helper function to build sortable column labels
   Widget _buildSortableColumnLabel(String label) {
     return Row(
       children: [

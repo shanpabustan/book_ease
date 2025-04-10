@@ -1,3 +1,5 @@
+import 'package:book_ease/screens/admin/managebook/edit_book.dart';
+import 'package:book_ease/screens/admin/managebook/view_book.dart';
 import 'package:flutter/material.dart';
 import 'book_data.dart'; // Reusable book data source
 import 'package:book_ease/modals/delete_modal.dart'; // Import DeactivateAccountModal
@@ -149,9 +151,9 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
                 _buildActionButton(Icons.picture_as_pdf, 'PDF', Colors.blue,
                     enable: isButtonEnabled),
                 const SizedBox(width: 16),
-                _buildActionButton(
-                    Icons.table_chart, 'Spreadsheet', Colors.green,
-                    enable: isButtonEnabled),
+                _buildActionButton(Icons.file_copy, 'Excel',
+                    Colors.green, // Change icon to Excel
+                    enable: isButtonEnabled), // Change label to 'Excel'
                 const SizedBox(width: 16),
                 _buildActionButton(Icons.delete, 'Delete', Colors.red,
                     onPressed: _showDeleteModal, enable: isButtonEnabled),
@@ -161,7 +163,7 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
 
             const SizedBox(height: 16),
 
-            // DataTable
+            // DataTable with improvements
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -169,7 +171,14 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
                   sortColumnIndex: sortColumnIndex,
                   sortAscending: ascending,
                   headingRowColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.grey.shade200),
+                    (states) => const Color.fromRGBO(212, 236, 234, 1),
+                  ),
+
+                  dataRowColor: MaterialStateColor.resolveWith(
+                    (states) => Colors.transparent, // Remove default row color
+                  ),
+                  dividerThickness:
+                      0.5, // Reduce the thickness of the horizontal lines
                   columns: [
                     DataColumn(
                       label: Checkbox(
@@ -179,7 +188,8 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
                     ),
                     DataColumn(
                       label: _buildSortableColumnLabel('Book ID'),
-                      onSort: (i, asc) => _sort((d) => d['bookId']!, i, asc),
+                      onSort: (i, asc) =>
+                          _sort((d) => int.parse(d['bookId']!), i, asc),
                     ),
                     DataColumn(
                       label: _buildSortableColumnLabel('Title'),
@@ -212,64 +222,89 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
                       List<DataRow>.generate(currentPageBooks.length, (index) {
                     final book = currentPageBooks[index];
                     int actualIndex = currentPage * rowsPerPage + index;
-                    return DataRow(cells: [
-                      DataCell(Checkbox(
-                        value: selectedRows[actualIndex],
-                        onChanged: (val) => _toggleRowSelection(val, index),
-                      )),
-                      DataCell(Text(book['bookId']!)),
-                      DataCell(SizedBox(
-                        width: 150,
-                        child: Text(
-                          book['title']!,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                      )),
-                      DataCell(SizedBox(
-                        width: 120,
-                        child: Text(
-                          book['author']!,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                      )),
-                      DataCell(Text(book['year']!)),
-                      DataCell(Text(book['category']!)),
-                      DataCell(_buildStatusChip(book['condition']!)),
-                      DataCell(Row(
-                        children: [
-                          Tooltip(
-                            message: 'View Book',
-                            child: IconButton(
-                              icon: const Icon(Icons.remove_red_eye_outlined,
-                                  size: 20),
-                              onPressed: () {
-                                // TODO: Add view logic
-                              },
-                            ),
+
+                    // Alternate row background color
+                    final isEvenRow = index % 2 == 0;
+
+                    return DataRow(
+                      color: MaterialStateProperty.resolveWith<Color?>(
+                        (states) => isEvenRow
+                            ? Colors.transparent
+                            : Colors
+                                .grey.shade100, // Light background for odd rows
+                      ),
+                      cells: [
+                        DataCell(Checkbox(
+                          value: selectedRows[actualIndex],
+                          onChanged: (val) => _toggleRowSelection(val, index),
+                        )),
+                        DataCell(Text(book['bookId']!)),
+                        DataCell(SizedBox(
+                          width: 150,
+                          child: Text(
+                            book['title']!,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
                           ),
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Edit Book',
-                            child: IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 20),
-                              onPressed: () {
-                                // TODO: Add edit logic
-                              },
-                            ),
+                        )),
+                        DataCell(SizedBox(
+                          width: 120,
+                          child: Text(
+                            book['author']!,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
                           ),
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Delete Book',
-                            child: IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 20),
-                              onPressed: _showDeleteModal,
+                        )),
+                        DataCell(Text(book['year']!)),
+                        DataCell(Text(book['category']!)),
+                        DataCell(_buildStatusChip(book['condition']!)),
+                        DataCell(Row(
+                          children: [
+                            Tooltip(
+                              message: 'View Book',
+                              child: IconButton(
+                                icon: const Icon(Icons.remove_red_eye_outlined,
+                                    size: 20),
+                                onPressed: () {
+                                  // Pass the book data to the ViewBookModal
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return ViewBookModal(book: book);
+                                    },
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      )),
-                    ]);
+                            const SizedBox(width: 8),
+                            Tooltip(
+                              message: 'Edit Book',
+                              child: IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 20),
+                                onPressed: () {
+                                  // Pass the book data to the EditBookModal
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return EditBookModal(book: book);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Tooltip(
+                              message: 'Delete Book',
+                              child: IconButton(
+                                icon:
+                                    const Icon(Icons.delete_outline, size: 20),
+                                onPressed: _showDeleteModal,
+                              ),
+                            ),
+                          ],
+                        )),
+                      ],
+                    );
                   }),
                 ),
               ),
@@ -328,6 +363,9 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: enable ? color : Colors.grey),
         backgroundColor: enable ? null : Colors.grey[300],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4), // Reduce border radius
+        ),
       ),
     );
   }

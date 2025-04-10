@@ -73,7 +73,8 @@ class _ManageBookState extends State<ManageBook> {
                     ),
                     const SizedBox(height: 20),
                     Expanded(
-                      child: BookManagementApp(), // Your Book Management Table
+                      child:
+                          BookManagementScreen(), // Your Book Management Table
                     ),
                     const SizedBox(height: 20),
                   ],

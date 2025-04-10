@@ -6,111 +6,104 @@ final List<Map<String, String>> bookList = [
     'title': 'Flutter for Beginners',
     'author': 'John Doe',
     'year': '2021',
+    'version': '1.0',
+    'isbn': '978-1-1111-1111-1',
+    'copies': '10',
+    'section': 'A',
+    'shelfLocation': 'Shelf 1',
     'category': 'Programming',
-    'condition': 'New'
+    'condition': 'New',
+    'description': 'A beginner guide to Flutter.',
+    'image': 'assets/images/percy-book.jpg'
   },
   {
     'bookId': '2',
     'title': 'Dart Essentials',
     'author': 'Jane Doe',
     'year': '2020',
+    'version': '2.1',
+    'isbn': '978-2-2222-2222-2',
+    'copies': '5',
+    'section': 'B',
+    'shelfLocation': 'Shelf 2',
     'category': 'Programming',
-    'condition': 'Used'
+    'condition': 'Used',
+    'description': 'Core concepts of Dart programming.',
+    'image': 'assets/images/harry-book.jpg'
   },
   {
     'bookId': '3',
     'title': 'Advanced Flutter',
     'author': 'John Smith',
     'year': '2022',
+    'version': '3.2',
+    'isbn': '978-3-3333-3333-3',
+    'copies': '7',
+    'section': 'A',
+    'shelfLocation': 'Shelf 3',
     'category': 'Programming',
-    'condition': 'New'
+    'condition': 'New',
+    'description': 'In-depth Flutter techniques.',
+    'image': 'assets/images/percy-book.jpg'
   },
   {
     'bookId': '4',
     'title': 'Data Science with Dart',
     'author': 'Sara Lee',
     'year': '2021',
+    'version': '1.5',
+    'isbn': '978-4-4444-4444-4',
+    'copies': '6',
+    'section': 'C',
+    'shelfLocation': 'Shelf 4',
     'category': 'Data Science',
-    'condition': 'Used'
+    'condition': 'Used',
+    'description': 'Using Dart for data science.',
+    'image': 'assets/images/harry-book.jpg'
   },
   {
     'bookId': '5',
     'title': 'Introduction to Algorithms',
     'author': 'Jane Smith',
     'year': '2019',
+    'version': '4th Edition',
+    'isbn': '978-5-5555-5555-5',
+    'copies': '8',
+    'section': 'D',
+    'shelfLocation': 'Shelf 5',
     'category': 'Computer Science',
-    'condition': 'New'
+    'condition': 'New',
+    'description': 'Comprehensive algorithms book.',
+    'image': 'assets/images/percy-book.jpg'
   },
   {
     'bookId': '6',
     'title': 'Machine Learning Basics',
     'author': 'Michael Brown',
     'year': '2023',
+    'version': '1.0',
+    'isbn': '978-6-6666-6666-6',
+    'copies': '12',
+    'section': 'E',
+    'shelfLocation': 'Shelf 6',
     'category': 'Machine Learning',
-    'condition': 'Used'
+    'condition': 'Used',
+    'description': 'Introductory ML concepts.',
+    'image': 'assets/images/harry-book.jpg'
   },
   {
     'bookId': '7',
     'title': 'Deep Learning with TensorFlow',
     'author': 'Emma Clark',
     'year': '2023',
+    'version': '2.0',
+    'isbn': '978-7-7777-7777-7',
+    'copies': '9',
+    'section': 'E',
+    'shelfLocation': 'Shelf 7',
     'category': 'Machine Learning',
-    'condition': 'New'
-  },
-  {
-    'bookId': '8',
-    'title': 'Flutter for Beginners',
-    'author': 'John Doe',
-    'year': '2021',
-    'category': 'Programming',
-    'condition': 'New'
-  },
-  {
-    'bookId': '9',
-    'title': 'Dart Essentials',
-    'author': 'Jane Doe',
-    'year': '2020',
-    'category': 'Programming',
-    'condition': 'Used'
-  },
-  {
-    'bookId': '10',
-    'title': 'Advanced Flutter',
-    'author': 'John Smith',
-    'year': '2022',
-    'category': 'Programming',
-    'condition': 'New'
-  },
-  {
-    'bookId': '11',
-    'title': 'Data Science with Dart',
-    'author': 'Sara Lee',
-    'year': '2021',
-    'category': 'Data Science',
-    'condition': 'Used'
-  },
-  {
-    'bookId': '12',
-    'title': 'Introduction to Algorithms',
-    'author': 'Jane Smith',
-    'year': '2019',
-    'category': 'Computer Science',
-    'condition': 'New'
-  },
-  {
-    'bookId': '13',
-    'title': 'Machine Learning Basics',
-    'author': 'Michael Brown',
-    'year': '2023',
-    'category': 'Machine Learning',
-    'condition': 'Used'
-  },
-  {
-    'bookId': '14',
-    'title': 'Deep Learning with TensorFlow',
-    'author': 'Emma Clark',
-    'year': '2023',
-    'category': 'Machine Learning',
-    'condition': 'New'
+    'condition': 'New',
+    'description': 'TensorFlow DL techniques.',
+    'image': 'assets/images/percy-book.jpg'
   },
 ];

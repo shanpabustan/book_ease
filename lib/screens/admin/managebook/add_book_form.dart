@@ -1,10 +1,11 @@
+// Import statements remain the same
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import this to use FilteringTextInputFormatter
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:book_ease/widgets/admin_buttons_widget.dart'; // Importing CustomButton
+import 'package:book_ease/widgets/admin_buttons_widget.dart';
 import 'package:book_ease/screens/admin/admin_theme.dart';
 
 class AddBookForm extends StatefulWidget {
@@ -17,7 +18,6 @@ class AddBookForm extends StatefulWidget {
 class _AddBookFormState extends State<AddBookForm> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
   final TextEditingController _bookIdController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
@@ -29,24 +29,32 @@ class _AddBookFormState extends State<AddBookForm> {
   final TextEditingController _shelfLocationController =
       TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _customCategoryController =
+      TextEditingController();
 
   String? _selectedCategory;
   String? _selectedCondition;
   File? _pickedImage;
 
-  final List<String> categories = [
+  final List<String> _baseCategories = [
     'Information System',
     'Computer Science',
     'Engineering',
-    'Mathematics'
+    'Mathematics',
+    'Others',
   ];
+  List<String> _categories = [];
 
   final List<String> conditions = ['New', 'Old'];
 
-  // Method to pick an image
+  @override
+  void initState() {
+    super.initState();
+    _categories = List.from(_baseCategories);
+  }
+
   void _pickImage() async {
     if (!kIsWeb) {
-      // Check for permissions explicitly
       var status = await Permission.photos.request();
       if (!status.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -57,7 +65,6 @@ class _AddBookFormState extends State<AddBookForm> {
     }
 
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
-
     if (result != null && result.files.single.path != null) {
       setState(() {
         _pickedImage = File(result.files.single.path!);
@@ -69,7 +76,6 @@ class _AddBookFormState extends State<AddBookForm> {
     }
   }
 
-  // Clear all form fields
   void _clearAll() {
     _formKey.currentState?.reset();
     _bookIdController.clear();
@@ -82,6 +88,7 @@ class _AddBookFormState extends State<AddBookForm> {
     _sectionController.clear();
     _shelfLocationController.clear();
     _descriptionController.clear();
+    _customCategoryController.clear();
     _pickedImage = null;
     setState(() {
       _selectedCategory = null;
@@ -89,7 +96,6 @@ class _AddBookFormState extends State<AddBookForm> {
     });
   }
 
-  // Save the form data
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
       if (_pickedImage == null) {
@@ -97,6 +103,25 @@ class _AddBookFormState extends State<AddBookForm> {
           const SnackBar(content: Text('Please upload an image')),
         );
         return;
+      }
+
+      // Handle custom category if "Others" was selected
+      if (_selectedCategory == 'Others') {
+        final customCategory = _customCategoryController.text.trim();
+        if (customCategory.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please enter a custom category')),
+          );
+          return;
+        }
+
+        if (!_categories.contains(customCategory)) {
+          setState(() {
+            _categories.insert(
+                _categories.length - 1, customCategory); // Before 'Others'
+            _selectedCategory = customCategory;
+          });
+        }
       }
 
       final bookData = {
@@ -116,8 +141,7 @@ class _AddBookFormState extends State<AddBookForm> {
       };
 
       print("BOOK DATA: $bookData");
-      Navigator.pop(
-          context); // You can replace this with an actual backend call
+      Navigator.pop(context);
     }
   }
 
@@ -135,8 +159,7 @@ class _AddBookFormState extends State<AddBookForm> {
             'Add Book',
             style: TextStyle(
               color: Colors.black,
-              fontSize: AdminFontSize
-                  .heading, // You can change 20 to your desired font size
+              fontSize: AdminFontSize.heading,
             ),
           ),
           centerTitle: true,
@@ -149,7 +172,6 @@ class _AddBookFormState extends State<AddBookForm> {
           ),
         ),
         body: SingleChildScrollView(
-          // Make the entire form scrollable
           child: Form(
             key: _formKey,
             child: Padding(
@@ -163,8 +185,7 @@ class _AddBookFormState extends State<AddBookForm> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap:
-                              _pickImage, // Call the _pickImage function here
+                          onTap: _pickImage,
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(16),
@@ -200,7 +221,7 @@ class _AddBookFormState extends State<AddBookForm> {
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: _selectedCategory,
-                          items: categories
+                          items: _categories
                               .map((cat) => DropdownMenuItem(
                                   value: cat, child: Text(cat)))
                               .toList(),
@@ -214,11 +235,40 @@ class _AddBookFormState extends State<AddBookForm> {
                             ),
                             border: const OutlineInputBorder(),
                           ),
-                          onChanged: (value) =>
-                              setState(() => _selectedCategory = value),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCategory = value;
+                              if (value != 'Others') {
+                                _customCategoryController.clear();
+                              }
+                            });
+                          },
                           validator: (value) =>
                               value == null ? 'Category is required' : null,
                         ),
+                        if (_selectedCategory == 'Others') ...[
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _customCategoryController,
+                            decoration: InputDecoration(
+                              labelText: 'Enter Custom Category',
+                              floatingLabelStyle: const TextStyle(
+                                  color: AdminColor.secondaryBackgroundColor),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: AdminColor.secondaryBackgroundColor),
+                              ),
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (_selectedCategory == 'Others' &&
+                                  (value == null || value.trim().isEmpty)) {
+                                return 'Please enter a custom category';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: _selectedCondition,
@@ -294,20 +344,22 @@ class _AddBookFormState extends State<AddBookForm> {
                           Row(
                             children: [
                               Expanded(
-                                  child: BookTextField(
-                                      label: 'Year Published',
-                                      controller: _yearController,
-                                      inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ])),
+                                child: BookTextField(
+                                    label: 'Year Published',
+                                    controller: _yearController,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ]),
+                              ),
                               const SizedBox(width: 16),
                               Expanded(
-                                  child: BookTextField(
-                                      label: 'Version',
-                                      controller: _versionController,
-                                      inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ])),
+                                child: BookTextField(
+                                    label: 'Version',
+                                    controller: _versionController,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ]),
+                              ),
                             ],
                           ),
                           BookTextField(
@@ -379,11 +431,10 @@ class BookTextField extends StatelessWidget {
         inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
-          floatingLabelStyle: const TextStyle(
-              color: AdminColor.secondaryBackgroundColor), // Added this line
+          floatingLabelStyle:
+              const TextStyle(color: AdminColor.secondaryBackgroundColor),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-                color: AdminColor.secondaryBackgroundColor), // Added this line
+            borderSide: BorderSide(color: AdminColor.secondaryBackgroundColor),
           ),
           border: const OutlineInputBorder(),
         ),
