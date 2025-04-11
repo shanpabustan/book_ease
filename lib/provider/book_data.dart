@@ -38,3 +38,47 @@ class Book {
     );
   }
 }
+
+class BorrowedBook {
+  final int bookId;
+  final String title;
+  final int copies;
+  final String dueDate;
+  final String image;
+    final String author;
+  final String year;
+  final String isbn;
+  final String shelfLocation;
+  final String librarySection;
+  final String description;
+
+  BorrowedBook({
+    required this.bookId,
+    required this.title,
+    required this.copies,
+    required this.dueDate,
+    required this.image,
+    required this.author,
+    required this.year,
+    required this.isbn,
+    required this.shelfLocation,
+    required this.librarySection,
+    required this.description,
+  });
+
+  factory BorrowedBook.fromJson(Map<String, dynamic> json) {
+    return BorrowedBook(
+      bookId: json['book_id'],
+      title: json['title'],
+      copies: json['copies'],
+      dueDate: json['due_date'],
+      image: json['picture'],
+      author: json['author'] ?? "Unknown",
+      year: json['year_published']?.toString() ?? "Unknown",
+      isbn: json['isbn'] ?? "Unknown",
+      shelfLocation: json['shelf_location'] ?? "Unknown",
+      librarySection: json['library_section'] ?? "Unknown",
+      description: json['description'] ?? "No description",
+    );
+  }
+}
