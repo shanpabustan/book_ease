@@ -12,52 +12,53 @@ class ViewBookModal extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       backgroundColor: Colors.white,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 800),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with Positioned Close Button
-                Stack(
-                  children: [
-                    Center(
-                      child: Text(
-                        'Book Information',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AdminColor.primaryTextColor,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: CircleAvatar(
-                          radius: 14,
-                          backgroundColor: AdminColor.secondaryBackgroundColor,
-                          child: const Icon(Icons.close,
-                              size: 16, color: Colors.white),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
-                  ],
+        constraints: const BoxConstraints(maxWidth: 900, maxHeight: 800),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header / AppBar Style
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey, width: 0.5),
                 ),
-                const SizedBox(height: 24),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: CircleAvatar(
+                      backgroundColor: AdminColor.secondaryBackgroundColor,
+                      child: const Icon(Icons.close, color: Colors.white),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Book Details',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: AdminFontSize.heading,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Placeholder for center alignment
+                ],
+              ),
+            ),
 
-                // Content
-                Row(
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Left Column
                     Expanded(
-                      flex: 2,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -71,7 +72,7 @@ class ViewBookModal extends StatelessWidget {
                                     BoxShadow(
                                       color: Colors.black12,
                                       blurRadius: 10,
-                                      offset: Offset(0, 4),
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
                                 ),
@@ -95,113 +96,161 @@ class ViewBookModal extends StatelessWidget {
                               label: 'Condition',
                               value: book['condition'] ?? ''),
                           const SizedBox(height: 16),
-                          const Text(
-                            'Description:',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+
+                          // Description with auto-height
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Description',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    border:
+                                        Border.all(color: Colors.grey.shade300),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    book['description'] ?? '',
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.black87),
+                                    softWrap: true,
+                                    textAlign: TextAlign.justify,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          Text(book['description'] ?? ''),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 20),
+
+                    const SizedBox(width: 32),
 
                     // Right Column
                     Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTextField(
-                              label: 'Book ID', value: book['bookId'] ?? ''),
-                          _buildTextField(
-                              label: 'Title', value: book['title'] ?? ''),
-                          _buildTextField(
-                              label: 'Author', value: book['author'] ?? ''),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildTextField(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Information',
+                              style: TextStyle(
+                                fontSize: AdminFontSize.subHeading,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                                label: 'Book ID', value: book['bookId'] ?? ''),
+                            _buildTextField(
+                                label: 'Title', value: book['title'] ?? ''),
+                            _buildTextField(
+                                label: 'Author', value: book['author'] ?? ''),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTextField(
                                     label: 'Year Published',
-                                    value: book['year'] ?? ''),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildTextField(
+                                    value: book['year'] ?? '',
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildTextField(
                                     label: 'Version',
-                                    value: book['version'] ?? ''),
-                              ),
-                            ],
-                          ),
-                          _buildTextField(
-                              label: 'ISBN', value: book['isbn'] ?? ''),
-                          // ✅ Correctly side-by-side
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildTextField(
+                                    value: book['version'] ?? '',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            _buildTextField(
+                                label: 'ISBN', value: book['isbn'] ?? ''),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTextField(
                                     label: 'Copies',
-                                    value: book['copies'] ?? ''),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildTextField(
+                                    value: book['copies'] ?? '',
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildTextField(
                                     label: 'Section',
-                                    value: book['section'] ?? ''),
-                              ),
-                            ],
-                          ),
-                          _buildTextField(
-                              label: 'Shelf Location',
-                              value: book['shelfLocation'] ?? ''),
-                        ],
+                                    value: book['section'] ?? '',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            _buildTextField(
+                                label: 'Shelf Location',
+                                value: book['shelfLocation'] ?? ''),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTextField({required String label, required String value}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          TextFormField(
-            initialValue: value,
-            readOnly: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey.shade400),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                    color: AdminColor.secondaryBackgroundColor, width: 2),
-              ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              filled: true,
-              fillColor: Colors.grey[200],
+Widget _buildTextField({required String label, required String value}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        TextFormField(
+          initialValue: value,
+          readOnly: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 16,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade400),
             ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide:
+                  const BorderSide(color: AdminColor.secondaryBackgroundColor),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            filled: true,
+            fillColor: Colors.grey[200],
           ),
-        ],
-      ),
-    );
-  }
+          style: const TextStyle(
+            color: Colors.black87,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    ),
+  );
 }

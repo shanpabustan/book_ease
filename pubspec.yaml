@@ -22,6 +22,7 @@ dependencies:
   flutter_glow: ^0.3.2
   fl_chart: ^0.70.2
   file_picker: ^10.0.0
+  awesome_snackbar_content: ^0.1.1
 
 dev_dependencies:
   flutter_test:
