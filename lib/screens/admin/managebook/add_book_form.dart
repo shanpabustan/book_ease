@@ -148,262 +148,342 @@ class _AddBookFormState extends State<AddBookForm> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: const EdgeInsets.all(24),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: const Text(
-            'Add Book',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: AdminFontSize.heading,
-            ),
-          ),
-          centerTitle: true,
-          leading: IconButton(
-            icon: CircleAvatar(
-              backgroundColor: AdminColor.secondaryBackgroundColor,
-              child: const Icon(Icons.close, color: Colors.white),
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      backgroundColor: Colors.white,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900, maxHeight: 800),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header / AppBar Style
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey, width: 0.5),
+                ),
+              ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // LEFT COLUMN
-                  Expanded(
-                    child: Column(
+                  IconButton(
+                    icon: CircleAvatar(
+                      backgroundColor: AdminColor.secondaryBackgroundColor,
+                      child: const Icon(Icons.close, color: Colors.white),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Add Book',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: AdminFontSize.heading,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                      width: 48), // Placeholder to align the title center
+                ],
+              ),
+            ),
+
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: _pickImage,
+                        // LEFT COLUMN
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: Colors.grey.shade300),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Text('Upload Image'),
+                                      const SizedBox(height: 12),
+                                      _pickedImage != null
+                                          ? ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: kIsWeb
+                                                  ? Image.network(
+                                                      _pickedImage!.path,
+                                                      height: 160,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.file(
+                                                      _pickedImage!,
+                                                      height: 160,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            )
+                                          : const Icon(Icons.image,
+                                              size: 100, color: Colors.grey),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<String>(
+                                value: _selectedCategory,
+                                items: _categories
+                                    .map((cat) => DropdownMenuItem(
+                                          value: cat,
+                                          child: Text(cat),
+                                        ))
+                                    .toList(),
+                                decoration: InputDecoration(
+                                  labelText: 'Category',
+                                  floatingLabelStyle: const TextStyle(
+                                    color: AdminColor.secondaryBackgroundColor,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color:
+                                          AdminColor.secondaryBackgroundColor,
+                                    ),
+                                  ),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedCategory = value;
+                                    if (value != 'Others') {
+                                      _customCategoryController.clear();
+                                    }
+                                  });
+                                },
+                                validator: (value) => value == null
+                                    ? 'Category is required'
+                                    : null,
+                              ),
+                              if (_selectedCategory == 'Others') ...[
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _customCategoryController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Enter Custom Category',
+                                    floatingLabelStyle: const TextStyle(
+                                      color:
+                                          AdminColor.secondaryBackgroundColor,
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            AdminColor.secondaryBackgroundColor,
+                                      ),
+                                    ),
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                  validator: (value) {
+                                    if (_selectedCategory == 'Others' &&
+                                        (value == null ||
+                                            value.trim().isEmpty)) {
+                                      return 'Please enter a custom category';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<String>(
+                                value: _selectedCondition,
+                                items: conditions
+                                    .map((cond) => DropdownMenuItem(
+                                          value: cond,
+                                          child: Text(cond),
+                                        ))
+                                    .toList(),
+                                decoration: InputDecoration(
+                                  labelText: 'Book Condition',
+                                  floatingLabelStyle: const TextStyle(
+                                    color: AdminColor.secondaryBackgroundColor,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color:
+                                          AdminColor.secondaryBackgroundColor,
+                                    ),
+                                  ),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                onChanged: (value) =>
+                                    setState(() => _selectedCondition = value),
+                                validator: (value) => value == null
+                                    ? 'Condition is required'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _descriptionController,
+                                maxLines:
+                                    8, // Increase this value for more height
+                                decoration: InputDecoration(
+                                  labelText: 'Description',
+                                  hintText: 'Write here...',
+                                  floatingLabelStyle: const TextStyle(
+                                    color: AdminColor.secondaryBackgroundColor,
+                                  ),
+                                  alignLabelWithHint:
+                                      true, // aligns with multi-line
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 43,
+                                    horizontal: 16,
+                                  ), // Increases internal height
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color:
+                                          AdminColor.secondaryBackgroundColor,
+                                    ),
+                                  ),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                validator: (value) =>
+                                    value == null || value.isEmpty
+                                        ? 'Description is required'
+                                        : null,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 32),
+
+                        // RIGHT COLUMN
+                        Expanded(
                           child: Container(
-                            width: double.infinity,
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.grey.shade300),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Upload Image'),
-                                const SizedBox(height: 12),
-                                _pickedImage != null
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: kIsWeb
-                                            ? Image.network(
-                                                _pickedImage!.path,
-                                                height: 160,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Image.file(
-                                                _pickedImage!,
-                                                height: 160,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      )
-                                    : const Icon(Icons.image,
-                                        size: 100, color: Colors.grey),
+                                const Text(
+                                  'Information',
+                                  style: TextStyle(
+                                    fontSize: AdminFontSize.subHeading,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                BookTextField(
+                                    label: 'Book ID',
+                                    controller: _bookIdController,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ]),
+                                BookTextField(
+                                    label: 'Title',
+                                    controller: _titleController),
+                                BookTextField(
+                                    label: 'Author',
+                                    controller: _authorController),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: BookTextField(
+                                        label: 'Year Published',
+                                        controller: _yearController,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: BookTextField(
+                                        label: 'Version',
+                                        controller: _versionController,
+                                        keyboardType: const TextInputType
+                                            .numberWithOptions(decimal: true),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp(r'^\d*\.?\d{0,2}')),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                BookTextField(
+                                    label: 'ISBN', controller: _isbnController),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: BookTextField(
+                                        label: 'Total Copies',
+                                        controller: _totalCopiesController,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: BookTextField(
+                                        label: 'Library Section',
+                                        controller: _sectionController,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                BookTextField(
+                                    label: 'Shelf Location',
+                                    controller: _shelfLocationController),
+                                const SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    CustomButton(
+                                      text: 'Clear All',
+                                      onPressed: _clearAll,
+                                      backgroundColor: Colors.white,
+                                      textColor: Colors.black,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    CustomButton(
+                                      text: 'Save',
+                                      onPressed: _saveForm,
+                                      backgroundColor:
+                                          AdminColor.secondaryBackgroundColor,
+                                      textColor: Colors.white,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: _selectedCategory,
-                          items: _categories
-                              .map((cat) => DropdownMenuItem(
-                                  value: cat, child: Text(cat)))
-                              .toList(),
-                          decoration: InputDecoration(
-                            labelText: 'Category',
-                            floatingLabelStyle: const TextStyle(
-                                color: AdminColor.secondaryBackgroundColor),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AdminColor.secondaryBackgroundColor),
-                            ),
-                            border: const OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCategory = value;
-                              if (value != 'Others') {
-                                _customCategoryController.clear();
-                              }
-                            });
-                          },
-                          validator: (value) =>
-                              value == null ? 'Category is required' : null,
-                        ),
-                        if (_selectedCategory == 'Others') ...[
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _customCategoryController,
-                            decoration: InputDecoration(
-                              labelText: 'Enter Custom Category',
-                              floatingLabelStyle: const TextStyle(
-                                  color: AdminColor.secondaryBackgroundColor),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: AdminColor.secondaryBackgroundColor),
-                              ),
-                              border: const OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (_selectedCategory == 'Others' &&
-                                  (value == null || value.trim().isEmpty)) {
-                                return 'Please enter a custom category';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: _selectedCondition,
-                          items: conditions
-                              .map((cond) => DropdownMenuItem(
-                                  value: cond, child: Text(cond)))
-                              .toList(),
-                          decoration: InputDecoration(
-                            labelText: 'Book Condition',
-                            floatingLabelStyle: const TextStyle(
-                                color: AdminColor.secondaryBackgroundColor),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AdminColor.secondaryBackgroundColor),
-                            ),
-                            border: const OutlineInputBorder(),
-                          ),
-                          onChanged: (value) =>
-                              setState(() => _selectedCondition = value),
-                          validator: (value) =>
-                              value == null ? 'Condition is required' : null,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _descriptionController,
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            labelText: 'Description',
-                            hintText: 'Write here...',
-                            floatingLabelStyle: const TextStyle(
-                                color: AdminColor.secondaryBackgroundColor),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AdminColor.secondaryBackgroundColor),
-                            ),
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Description is required'
-                              : null,
-                        ),
+                        // CUT HERE
                       ],
                     ),
                   ),
-                  const SizedBox(width: 32),
-                  // RIGHT COLUMN
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Information',
-                              style: TextStyle(
-                                  fontSize: AdminFontSize.subHeading,
-                                  fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          BookTextField(
-                              label: 'Book ID',
-                              controller: _bookIdController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ]),
-                          BookTextField(
-                              label: 'Title', controller: _titleController),
-                          BookTextField(
-                              label: 'Author', controller: _authorController),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: BookTextField(
-                                    label: 'Year Published',
-                                    controller: _yearController,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ]),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: BookTextField(
-                                    label: 'Version',
-                                    controller: _versionController,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ]),
-                              ),
-                            ],
-                          ),
-                          BookTextField(
-                              label: 'ISBN', controller: _isbnController),
-                          BookTextField(
-                              label: 'Total Copies',
-                              controller: _totalCopiesController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ]),
-                          BookTextField(
-                              label: 'Library Section',
-                              controller: _sectionController),
-                          BookTextField(
-                              label: 'Shelf Location',
-                              controller: _shelfLocationController),
-                          const SizedBox(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              CustomButton(
-                                text: 'Clear All',
-                                onPressed: _clearAll,
-                                backgroundColor: Colors.white,
-                                textColor: Colors.black,
-                              ),
-                              const SizedBox(width: 12),
-                              CustomButton(
-                                text: 'Save',
-                                onPressed: _saveForm,
-                                backgroundColor:
-                                    AdminColor.secondaryBackgroundColor,
-                                textColor: Colors.white,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+
+            // Cut Here
+          ],
         ),
       ),
     );
@@ -414,12 +494,14 @@ class BookTextField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
 
   const BookTextField({
     required this.label,
     required this.controller,
     this.inputFormatters,
     super.key,
+    this.keyboardType,
   });
 
   @override
@@ -429,6 +511,7 @@ class BookTextField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
           floatingLabelStyle:
