@@ -14,6 +14,9 @@ class AdminColor {
       Color.fromRGBO(250, 250, 250, 1); // Light background color
   static const Color secondaryBackgroundColor =
       Color.fromRGBO(49, 120, 115, 1); // Secondary color
+  static const Color tertiaryBackgroundColor = Color.fromRGBO(110, 107, 107, 1);
+// Grey color
+  static const Color sidebarBackgroundColor = Color.fromRGBO(51, 53, 54, 1);
 
   // Border Colors
   static const Color borderColor =

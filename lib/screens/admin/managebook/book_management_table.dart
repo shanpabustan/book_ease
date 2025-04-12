@@ -1,16 +1,21 @@
-import 'dart:convert'; // Import for base64 decoding
+import 'package:book_ease/screens/admin/managebook/edit_book.dart';
+import 'package:book_ease/screens/admin/managebook/view_book.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart'; // Import Dio for API requests
+import 'book_data.dart'; // Reusable book data source
+import 'package:book_ease/modals/delete_modal.dart'; // Import Delete Modal
 
 class BookManagementApp extends StatelessWidget {
-  const BookManagementApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: BookManagementScreen(),
-    );
+    return MaterialApp(
+  debugShowCheckedModeBanner: false,
+  theme: ThemeData(
+    textTheme: const TextTheme(
+      bodyMedium: TextStyle(color: Colors.black),
+    ),
+  ),
+  home: const BookManagementScreen(),
+);
   }
 }
 
@@ -28,36 +33,19 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
   bool isButtonEnabled = false;
 
   int currentPage = 0;
-  int rowsPerPage = 10; // ✅ Removed 'final' to allow mutation
+  int rowsPerPage = 8;
 
-  List<Map<String, dynamic>> books = []; // Update type to dynamic
+  List<Map<String, String>> books = List.from(bookList);
   List<bool> selectedRows = [];
 
   @override
   void initState() {
     super.initState();
-    fetchBooks(); // Fetch books when the screen is initialized
+    selectedRows = List.generate(books.length, (_) => false);
   }
 
-  Future<void> fetchBooks() async {
-    try {
-      final response = await Dio().get('http://127.0.0.1:5566/get-all'); // Update your URL here
-      if (response.statusCode == 200) {
-        setState(() {
-          books = List<Map<String, dynamic>>.from(response.data['data']); // Cast to List<Map<String, dynamic>>
-          selectedRows = List.generate(books.length, (_) => false); // Initialize selectedRows based on the fetched books
-        });
-      }
-    } catch (e) {
-      print('Error fetching books: $e');
-      // You can also show an error message using a SnackBar or dialog
-    }
-  }
-
-  List<List<Map<String, dynamic>>> get paginatedBooks {
-    List<List<Map<String, dynamic>>> chunks = [];
-    if (books.isEmpty) return chunks; // Handle empty list case
-
+  List<List<Map<String, String>>> get paginatedBooks {
+    List<List<Map<String, String>>> chunks = [];
     for (int i = 0; i < books.length; i += rowsPerPage) {
       chunks.add(books.sublist(
           i, i + rowsPerPage > books.length ? books.length : i + rowsPerPage));
@@ -65,7 +53,7 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
     return chunks;
   }
 
-  void _sort<T>(Comparable<T> Function(Map<String, dynamic> d) getField,
+  void _sort<T>(Comparable<T> Function(Map<String, String> d) getField,
       int columnIndex, bool ascending) {
     books.sort((a, b) {
       final aValue = getField(a);
@@ -136,176 +124,108 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
     }
   }
 
+  void _showDeleteModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteDataModal(
+          onCancel: () => Navigator.pop(context),
+          onDelete: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Data deleted')),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Handle cases where there are no books
-    if (books.isEmpty) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF3F6F9),
-        body: Center(child: const Text('No books available.')),
-      );
-    }
-
-    List<Map<String, dynamic>> currentPageBooks = paginatedBooks[currentPage];
+    List<Map<String, String>> currentPageBooks = paginatedBooks[currentPage];
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6F9),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Action Buttons
-            Row(
-              children: [
-                _buildActionButton(Icons.picture_as_pdf, 'PDF', Colors.blue),
-                const SizedBox(width: 16),
-                _buildActionButton(
-                    Icons.table_chart, 'Spreadsheet', Colors.green),
-                const SizedBox(width: 16),
-                _buildActionButton(Icons.delete, 'Delete', Colors.red),
-                const Spacer(),
-              ],
-            ),
+            _buildActionButtons(),
             const SizedBox(height: 16),
-
-            // DataTable
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  sortColumnIndex: sortColumnIndex,
-                  sortAscending: ascending,
-                  headingRowColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.grey.shade200),
-                  columns: [
-                    DataColumn(
-                      label: Checkbox(
-                        value: isAllSelected,
-                        onChanged: _toggleSelectAll,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(minWidth: constraints.maxWidth),
+                        child: DataTable(
+                          sortColumnIndex: sortColumnIndex,
+                          sortAscending: ascending,
+                          headingRowColor: MaterialStateColor.resolveWith(
+                              (states) => const Color(0xFFD4ECEA)),
+                          columns: _buildTableColumns(),
+                          rows: List.generate(currentPageBooks.length, (index) {
+                            final book = currentPageBooks[index];
+                            int actualIndex = currentPage * rowsPerPage + index;
+                            final isEvenRow = index % 2 == 0;
+
+                            return DataRow(
+                              color: MaterialStateProperty.resolveWith<Color?>(
+                                (states) => isEvenRow
+                                    ? Colors.transparent
+                                    : Colors.grey.shade100,
+                              ),
+                              cells: [
+                                DataCell(Checkbox(
+                                  value: selectedRows[actualIndex],
+                                  onChanged: (val) =>
+                                      _toggleRowSelection(val, index),
+                                )),
+                                DataCell(Text(book['bookId'] ?? 'N/A')),
+                                DataCell(SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                    book['title'] ?? 'Unknown',
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                  ),
+                                )),
+                                DataCell(SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    book['author'] ?? 'Unknown',
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                  ),
+                                )),
+                                DataCell(Text(book['year'] ?? 'N/A')),
+                                DataCell(Text(book['category'] ?? 'N/A')),
+                                DataCell(_buildStatusChip(
+                                    book['condition'] ?? 'N/A')),
+                                DataCell(_buildActionIcons(book)),
+                              ],
+                            );
+                          }),
+                        ),
                       ),
                     ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Book ID'),
-                      onSort: (i, asc) => _sort((d) => d['book_id']!, i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Title'),
-                      onSort: (i, asc) => _sort((d) => d['title']!, i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Author'),
-                      onSort: (i, asc) => _sort((d) => d['author']!, i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Year'),
-                      onSort: (i, asc) => _sort((d) => d['year_published']!, i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Copies'),
-                      onSort: (i, asc) =>
-                          _sort((d) => int.parse(d['total_copies']!), i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Category'),
-                      onSort: (i, asc) => _sort((d) => d['category']!, i, asc),
-                    ),
-                    DataColumn(
-                      label: _buildSortableColumnLabel('Condition'),
-                      onSort: (i, asc) => _sort((d) => d['book_condition']!, i, asc),
-                    ),
-                    const DataColumn(label: Text('Action')),
-                  ],
-                  rows:
-                      List<DataRow>.generate(currentPageBooks.length, (index) {
-                    final book = currentPageBooks[index];
-                    int actualIndex = currentPage * rowsPerPage + index;
-                    return DataRow(cells: [
-                      DataCell(Checkbox(
-                        value: selectedRows[actualIndex],
-                        onChanged: (val) => _toggleRowSelection(val, index),
-                      )),
-                      DataCell(Text(book['book_id'].toString())), // Updated to use the correct key
-                      DataCell(SizedBox(
-                        width: 150,
-                        child: Text(
-                          book['title']!,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                      )),
-                      DataCell(SizedBox(
-                        width: 120,
-                        child: Text(
-                          book['author']!,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                      )),
-                      DataCell(Text(book['year_published'].toString())), // Updated key
-                      DataCell(Text(book['total_copies'].toString())), // Updated key
-                      DataCell(Text(book['category']!)),
-                      DataCell(_buildStatusChip(book['book_condition']!)),
-                      DataCell(Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove_red_eye_outlined),
-                            onPressed: () {
-                              // Show the image in a dialog when clicked
-                              _showBookImage(book['picture']);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined),
-                            onPressed: () {
-                              // Edit functionality can be implemented here
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () {
-                              // Delete functionality can be implemented here
-                            },
-                          ),
-                        ],
-                      )),
-                    ]);
-                  }),
-                ),
+                  );
+                },
               ),
             ),
-
-            // Pagination
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text('Rows per page:'),
-                const SizedBox(width: 8),
-                DropdownButton<int>(
-                  value: rowsPerPage,
-                  items: [4, 10, 20, 50]
-                      .map((rows) => DropdownMenuItem<int>(
-                            value: rows,
-                            child: Text('$rows'),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        currentPage = 0;
-                        rowsPerPage = value; // ✅ Now mutable
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(width: 16),
                 Text(
                   '${currentPage * rowsPerPage + 1}–${(currentPage * rowsPerPage + currentPageBooks.length)} of ${books.length}',
                 ),
                 IconButton(
                   icon: const Icon(Icons.first_page),
                   onPressed: currentPage > 0
-                      ? () => setState(() {
-                            currentPage = 0;
-                          })
+                      ? () => setState(() => currentPage = 0)
                       : null,
                 ),
                 IconButton(
@@ -321,9 +241,8 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
                 IconButton(
                   icon: const Icon(Icons.last_page),
                   onPressed: currentPage < paginatedBooks.length - 1
-                      ? () => setState(() {
-                            currentPage = paginatedBooks.length - 1;
-                          })
+                      ? () => setState(
+                          () => currentPage = paginatedBooks.length - 1)
                       : null,
                 ),
               ],
@@ -334,46 +253,130 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
     );
   }
 
-  void _showBookImage(String? picture) {
-    if (picture != null && picture.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Image.memory(
-              base64Decode(picture.split(',').last), // Remove prefix and decode
-              fit: BoxFit.cover,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No image available')),
-      );
-    }
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        _buildActionButton(Icons.picture_as_pdf, 'PDF', Colors.blue, () {}),
+        const SizedBox(width: 16),
+        _buildActionButton(Icons.file_copy, 'Excel', Colors.green, () {}),
+        const SizedBox(width: 16),
+        _buildActionButton(Icons.delete, 'Delete', Colors.red, () {}),
+        const Spacer(),
+      ],
+    );
   }
 
-  Widget _buildActionButton(IconData icon, String label, Color color) {
+  List<DataColumn> _buildTableColumns() {
+    return [
+      DataColumn(
+        label: Checkbox(
+          value: isAllSelected,
+          onChanged: _toggleSelectAll,
+        ),
+      ),
+      DataColumn(
+        label: _buildSortableColumnLabel('Book ID'),
+        onSort: (i, asc) =>
+            _sort((d) => int.tryParse(d['bookId'] ?? '0') ?? 0, i, asc),
+      ),
+      DataColumn(
+        label: _buildSortableColumnLabel('Title'),
+        onSort: (i, asc) => _sort((d) => d['title'] ?? '', i, asc),
+      ),
+      DataColumn(
+        label: _buildSortableColumnLabel('Author'),
+        onSort: (i, asc) => _sort((d) => d['author'] ?? '', i, asc),
+      ),
+      DataColumn(
+        label: _buildSortableColumnLabel('Year'),
+        onSort: (i, asc) => _sort((d) => d['year'] ?? '', i, asc),
+      ),
+      DataColumn(
+        label: _buildSortableColumnLabel('Category'),
+        onSort: (i, asc) => _sort((d) => d['category'] ?? '', i, asc),
+      ),
+      DataColumn(
+        label: _buildSortableColumnLabel('Condition'),
+        onSort: (i, asc) => _sort((d) => d['condition'] ?? '', i, asc),
+      ),
+      const DataColumn(
+        label: Text(
+          'Action',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildActionIcons(Map<String, String> book) {
+    return Row(
+      children: [
+        Tooltip(
+          message: 'View Book',
+          child: IconButton(
+            icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => ViewBookModal(book: book),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Edit Book',
+          child: IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 20),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => EditBookForm(initialBookData: book),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Delete Book',
+          child: IconButton(
+            icon: const Icon(Icons.delete_outline, size: 20),
+            onPressed: _showDeleteModal,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+      IconData icon, String label, Color color, VoidCallback? onPressed) {
     return OutlinedButton.icon(
-      onPressed: isButtonEnabled ? () {} : null,
-      icon: Icon(icon, color: color),
-      label: Text(label, style: TextStyle(color: color)),
+      onPressed: isButtonEnabled ? onPressed : null,
+      icon: Icon(icon, color: isButtonEnabled ? color : Colors.grey),
+      label: Text(
+        label,
+        style: TextStyle(color: isButtonEnabled ? color : Colors.grey),
+      ),
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: isButtonEnabled ? color : Colors.grey),
         backgroundColor: isButtonEnabled ? null : Colors.grey[300],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
     );
   }
 
+
+  Widget _buildSortableColumnLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    );
+  }
+
   Widget _buildStatusChip(String status) {
-    final color = status == 'New' ? Colors.green : Colors.orange;
+    final color = status == 'New'
+        ? Colors.green
+        : const Color.fromARGB(255, 244, 168, 54);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -381,15 +384,6 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(status, style: TextStyle(color: color)),
-    );
-  }
-
-  Widget _buildSortableColumnLabel(String label) {
-    return Row(
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        const Icon(Icons.unfold_more, size: 16),
-      ],
     );
   }
 }

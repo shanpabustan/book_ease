@@ -54,8 +54,8 @@ class MyApp extends StatelessWidget {
          ),
        ),
         //home:LibraryScreen(),
-        home:LogBookEaseApp(),
-       //home: AdminDashboard(), //LogBookEaseApp(),  //  // Main screen after login or wherever you direct
+        //home:LogBookEaseApp(),
+       home: AdminDashboard(),  //  // Main screen after login or wherever you direct
       ),
     );
   }

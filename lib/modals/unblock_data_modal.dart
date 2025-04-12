@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class LogoutModal extends StatelessWidget {
+class UnblockDataModal extends StatelessWidget {
   final VoidCallback onCancel;
-  final VoidCallback onLogout;
+  final VoidCallback onUnblock;
 
-  const LogoutModal({
+  const UnblockDataModal({
     super.key,
     required this.onCancel,
-    required this.onLogout,
+    required this.onUnblock,
   });
 
   @override
@@ -29,7 +29,7 @@ class LogoutModal extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Logout',
+                    'Unblock User',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -46,25 +46,25 @@ class LogoutModal extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 20),
 
-              // Icon + Text
+              // Icon + Text for Unblocking
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade100,
+                      color: Colors.blue.shade100,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.logout,
-                      color: Colors.red,
+                      Icons.person_add_disabled,
+                      color: Colors.blue,
                       size: 24,
                     ),
                   ),
                   const SizedBox(width: 16),
                   const Expanded(
                     child: Text(
-                      'Are you sure you want to log out? You will need to sign in again to access your account.',
+                      'Are you sure you want to unblock this user? This action cannot be undone.',
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
@@ -100,10 +100,15 @@ class LogoutModal extends StatelessWidget {
                   const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: () {
-                      onLogout(); // Perform logout logic
+                      // Perform unblock logic here
+                      onUnblock();
+
+                      // Close the modal
+                      Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor:
+                          Colors.blue, // Use blue for unblock action
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -111,14 +116,14 @@ class LogoutModal extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
-                        'Logout',
+                        'Unblock',
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                  ),
+                  )
                 ],
               ),
             ],

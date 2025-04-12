@@ -1,56 +1,87 @@
-// Import statements remain the same
 import 'dart:io';
+import 'package:book_ease/utils/snackbar_util.dart';
+import 'package:book_ease/widgets/admin_buttons_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:book_ease/widgets/admin_buttons_widget.dart';
 import 'package:book_ease/screens/admin/admin_theme.dart';
 
-class AddBookForm extends StatefulWidget {
-  const AddBookForm({Key? key}) : super(key: key);
+class EditBookForm extends StatefulWidget {
+  final Map<String, dynamic> initialBookData; // Receiving initial data
+
+  const EditBookForm({Key? key, required this.initialBookData})
+      : super(key: key);
 
   @override
-  State<AddBookForm> createState() => _AddBookFormState();
+  State<EditBookForm> createState() => _EditBookFormState();
 }
 
-class _AddBookFormState extends State<AddBookForm> {
+class _EditBookFormState extends State<EditBookForm> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _bookIdController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _authorController = TextEditingController();
-  final TextEditingController _yearController = TextEditingController();
-  final TextEditingController _versionController = TextEditingController();
-  final TextEditingController _isbnController = TextEditingController();
-  final TextEditingController _totalCopiesController = TextEditingController();
-  final TextEditingController _sectionController = TextEditingController();
-  final TextEditingController _shelfLocationController =
-      TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _customCategoryController =
-      TextEditingController();
+  late TextEditingController _bookIdController;
+  late TextEditingController _titleController;
+  late TextEditingController _authorController;
+  late TextEditingController _yearController;
+  late TextEditingController _versionController;
+  late TextEditingController _isbnController;
+  late TextEditingController _totalCopiesController;
+  late TextEditingController _sectionController;
+  late TextEditingController _shelfLocationController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _customCategoryController;
 
   String? _selectedCategory;
   String? _selectedCondition;
   File? _pickedImage;
 
   final List<String> _baseCategories = [
-    'Information System',
-    'Computer Science',
-    'Engineering',
-    'Mathematics',
+    'Programming',
+    'Fiction',
+    'Non Fiction',
+    'Data Science',
+    'Machine Learning',
     'Others',
   ];
   List<String> _categories = [];
 
-  final List<String> conditions = ['New', 'Old'];
+  final List<String> conditions = ['New', 'Used'];
 
   @override
   void initState() {
     super.initState();
     _categories = List.from(_baseCategories);
+
+    // Initialize controllers with data passed from the parent widget
+    _bookIdController =
+        TextEditingController(text: widget.initialBookData['bookId']);
+    _titleController =
+        TextEditingController(text: widget.initialBookData['title']);
+    _authorController =
+        TextEditingController(text: widget.initialBookData['author']);
+    _yearController =
+        TextEditingController(text: widget.initialBookData['year']);
+    _versionController =
+        TextEditingController(text: widget.initialBookData['version']);
+    _isbnController =
+        TextEditingController(text: widget.initialBookData['isbn']);
+    _totalCopiesController =
+        TextEditingController(text: widget.initialBookData['copies']);
+    _sectionController =
+        TextEditingController(text: widget.initialBookData['section']);
+    _shelfLocationController =
+        TextEditingController(text: widget.initialBookData['shelfLocation']);
+    _descriptionController =
+        TextEditingController(text: widget.initialBookData['description']);
+    _customCategoryController = TextEditingController();
+
+    _selectedCategory = widget.initialBookData['category'];
+    _selectedCondition = widget.initialBookData['condition'];
+    if (widget.initialBookData['image'] != null) {
+      _pickedImage = File(widget.initialBookData['image']);
+    }
   }
 
   void _pickImage() async {
@@ -105,7 +136,6 @@ class _AddBookFormState extends State<AddBookForm> {
         return;
       }
 
-      // Handle custom category if "Others" was selected
       if (_selectedCategory == 'Others') {
         final customCategory = _customCategoryController.text.trim();
         if (customCategory.isEmpty) {
@@ -117,12 +147,14 @@ class _AddBookFormState extends State<AddBookForm> {
 
         if (!_categories.contains(customCategory)) {
           setState(() {
-            _categories.insert(
-                _categories.length - 1, customCategory); // Before 'Others'
+            _categories.insert(_categories.length - 1, customCategory);
             _selectedCategory = customCategory;
           });
         }
       }
+
+      // ✅ Debug print here
+      print('Selected Condition: $_selectedCondition');
 
       final bookData = {
         'bookId': _bookIdController.text,
@@ -140,7 +172,16 @@ class _AddBookFormState extends State<AddBookForm> {
         'image': _pickedImage?.path ?? '',
       };
 
-      print("BOOK DATA: $bookData");
+      print("Updated Book Data: $bookData");
+
+      showCustomSnackBar(
+        context,
+        message: 'Book updated successfully!',
+        backgroundColor: Colors.green,
+        icon: Icons.check_circle,
+      );
+
+      // ✅ Then close the modal/dialog
       Navigator.pop(context);
     }
   }
@@ -176,7 +217,7 @@ class _AddBookFormState extends State<AddBookForm> {
                   const Expanded(
                     child: Center(
                       child: Text(
-                        'Add Book',
+                        'Edit Book',
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: AdminFontSize.heading,
@@ -273,48 +314,27 @@ class _AddBookFormState extends State<AddBookForm> {
                                   });
                                 },
                                 validator: (value) => value == null
-                                    ? 'Category is required'
+                                    ? 'Please select a category'
                                     : null,
                               ),
-                              if (_selectedCategory == 'Others') ...[
-                                const SizedBox(height: 16),
-                                TextFormField(
+                              const SizedBox(height: 16),
+                              if (_selectedCategory == 'Others')
+                                CustomTextFormField(
                                   controller: _customCategoryController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Enter Custom Category',
-                                    floatingLabelStyle: const TextStyle(
-                                      color:
-                                          AdminColor.secondaryBackgroundColor,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color:
-                                            AdminColor.secondaryBackgroundColor,
-                                      ),
-                                    ),
-                                    border: const OutlineInputBorder(),
-                                  ),
-                                  validator: (value) {
-                                    if (_selectedCategory == 'Others' &&
-                                        (value == null ||
-                                            value.trim().isEmpty)) {
-                                      return 'Please enter a custom category';
-                                    }
-                                    return null;
-                                  },
+                                  label: 'Enter Custom Category',
                                 ),
-                              ],
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
                                 value: _selectedCondition,
                                 items: conditions
-                                    .map((cond) => DropdownMenuItem(
-                                          value: cond,
-                                          child: Text(cond),
-                                        ))
+                                    .map(
+                                        (condition) => DropdownMenuItem<String>(
+                                              value: condition,
+                                              child: Text(condition),
+                                            ))
                                     .toList(),
                                 decoration: InputDecoration(
-                                  labelText: 'Book Condition',
+                                  labelText: 'Condition',
                                   floatingLabelStyle: const TextStyle(
                                     color: AdminColor.secondaryBackgroundColor,
                                   ),
@@ -326,17 +346,20 @@ class _AddBookFormState extends State<AddBookForm> {
                                   ),
                                   border: const OutlineInputBorder(),
                                 ),
-                                onChanged: (value) =>
-                                    setState(() => _selectedCondition = value),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedCondition = value;
+                                  });
+                                },
                                 validator: (value) => value == null
-                                    ? 'Condition is required'
+                                    ? 'Please select a condition'
                                     : null,
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: _descriptionController,
                                 maxLines:
-                                    8, // Increase this value for more height
+                                    5, // Increase this value for more height
                                 decoration: InputDecoration(
                                   labelText: 'Description',
                                   hintText: 'Write here...',
@@ -346,7 +369,7 @@ class _AddBookFormState extends State<AddBookForm> {
                                   alignLabelWithHint:
                                       true, // aligns with multi-line
                                   contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 43,
+                                    vertical: 42,
                                     horizontal: 16,
                                   ), // Increases internal height
                                   focusedBorder: OutlineInputBorder(
@@ -365,9 +388,9 @@ class _AddBookFormState extends State<AddBookForm> {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 32),
 
                         // RIGHT COLUMN
+                        const SizedBox(width: 16),
                         Expanded(
                           child: Container(
                             padding: const EdgeInsets.all(16),
@@ -386,32 +409,34 @@ class _AddBookFormState extends State<AddBookForm> {
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                BookTextField(
-                                    label: 'Book ID',
+                                CustomTextFormField(
                                     controller: _bookIdController,
+                                    label: 'Book ID',
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly
                                     ]),
-                                BookTextField(
-                                    label: 'Title',
-                                    controller: _titleController),
-                                BookTextField(
-                                    label: 'Author',
-                                    controller: _authorController),
+                                CustomTextFormField(
+                                  controller: _titleController,
+                                  label: 'Title',
+                                ),
+                                CustomTextFormField(
+                                  controller: _authorController,
+                                  label: 'Author',
+                                ),
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: BookTextField(
-                                        label: 'Year Published',
-                                        controller: _yearController,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.digitsOnly
-                                        ],
-                                      ),
+                                      child: CustomTextFormField(
+                                          controller: _yearController,
+                                          label: 'Year of Publication',
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly
+                                          ]),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
-                                      child: BookTextField(
+                                      child: CustomTextFormField(
                                         label: 'Version',
                                         controller: _versionController,
                                         keyboardType: const TextInputType
@@ -424,32 +449,34 @@ class _AddBookFormState extends State<AddBookForm> {
                                     ),
                                   ],
                                 ),
-                                BookTextField(
-                                    label: 'ISBN', controller: _isbnController),
+                                CustomTextFormField(
+                                  controller: _isbnController,
+                                  label: 'ISBN',
+                                ),
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: BookTextField(
-                                        label: 'Total Copies',
-                                        controller: _totalCopiesController,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                        ],
-                                      ),
+                                      child: CustomTextFormField(
+                                          controller: _totalCopiesController,
+                                          label: 'Total Copies',
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly
+                                          ]),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
-                                      child: BookTextField(
-                                        label: 'Library Section',
+                                      child: CustomTextFormField(
                                         controller: _sectionController,
+                                        label: 'Section',
                                       ),
                                     ),
                                   ],
                                 ),
-                                BookTextField(
-                                    label: 'Shelf Location',
-                                    controller: _shelfLocationController),
+                                CustomTextFormField(
+                                  controller: _shelfLocationController,
+                                  label: 'Shelf Location',
+                                ),
                                 const SizedBox(height: 24),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
@@ -474,15 +501,14 @@ class _AddBookFormState extends State<AddBookForm> {
                             ),
                           ),
                         ),
-                        // CUT HERE
+
+                        // CUT THIS
                       ],
                     ),
                   ),
                 ),
               ),
             ),
-
-            // Cut Here
           ],
         ),
       ),
@@ -490,17 +516,17 @@ class _AddBookFormState extends State<AddBookForm> {
   }
 }
 
-class BookTextField extends StatelessWidget {
-  final String label;
+class CustomTextFormField extends StatelessWidget {
   final TextEditingController controller;
+  final String label;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
 
-  const BookTextField({
-    required this.label,
-    required this.controller,
-    this.inputFormatters,
+  const CustomTextFormField({
     super.key,
+    required this.controller,
+    required this.label,
+    this.inputFormatters,
     this.keyboardType,
   });
 
@@ -510,8 +536,8 @@ class BookTextField extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
         controller: controller,
-        inputFormatters: inputFormatters,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
           floatingLabelStyle:

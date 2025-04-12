@@ -19,35 +19,42 @@ class SearchAdmin extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 300,
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        style: const TextStyle(color: Colors.black), // Text color set to black
-        decoration: InputDecoration(
-          filled: true, // Set filled to true for background color
-          fillColor: Colors.white, // White background color
-          hintText: hintText,
-          hintStyle: const TextStyle(
-              color: Colors.grey), // Optional: change hint text color
-          prefixIcon:
-              const Icon(Icons.search, color: Colors.grey), // Icon color
-          contentPadding: const EdgeInsets.symmetric(
+      child: Container(
+        height: 40, // Set the height explicitly
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          style:
+              const TextStyle(color: Colors.black), // Text color set to black
+          decoration: InputDecoration(
+            filled: true, // Set filled to true for background color
+            fillColor: Colors.white, // White background color
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Colors.grey, // Hint text color
+              fontSize: 14, // Reduced font size for the hint text
+            ),
+            prefixIcon:
+                const Icon(Icons.search, color: Colors.grey), // Icon color
+            contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
-              vertical: 15), // Adjust vertical padding for better spacing
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                BorderSide(color: secondaryTextColor), // Default border color
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                BorderSide(color: secondaryTextColor), // Focused border color
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                BorderSide(color: secondaryTextColor), // Enabled border color
+              vertical: 8, // Adjusted vertical padding for reduced height
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  BorderSide(color: secondaryTextColor), // Default border color
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  BorderSide(color: secondaryTextColor), // Focused border color
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  BorderSide(color: secondaryTextColor), // Enabled border color
+            ),
           ),
         ),
       ),
