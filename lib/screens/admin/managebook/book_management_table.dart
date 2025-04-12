@@ -8,14 +8,14 @@ class BookManagementApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-  debugShowCheckedModeBanner: false,
-  theme: ThemeData(
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.black),
-    ),
-  ),
-  home: const BookManagementScreen(),
-);
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Colors.black),
+        ),
+      ),
+      home: const BookManagementScreen(),
+    );
   }
 }
 
@@ -173,40 +173,39 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
                             final isEvenRow = index % 2 == 0;
 
                             return DataRow(
-                              color: MaterialStateProperty.resolveWith<Color?>(
-                                (states) => isEvenRow
-                                    ? Colors.transparent
-                                    : Colors.grey.shade100,
-                              ),
-                              cells: [
-                                DataCell(Checkbox(
-                                  value: selectedRows[actualIndex],
-                                  onChanged: (val) =>
-                                      _toggleRowSelection(val, index),
-                                )),
-                                DataCell(Text(book['bookId'] ?? 'N/A')),
-                                DataCell(SizedBox(
-                                  width: 150,
-                                  child: Text(
-                                    book['title'] ?? 'Unknown',
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                  ),
-                                )),
-                                DataCell(SizedBox(
-                                  width: 120,
-                                  child: Text(
-                                    book['author'] ?? 'Unknown',
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                  ),
-                                )),
-                                DataCell(Text(book['year'] ?? 'N/A')),
-                                DataCell(Text(book['category'] ?? 'N/A')),
-                                DataCell(_buildStatusChip(
-                                    book['condition'] ?? 'N/A')),
-                                DataCell(_buildActionIcons(book)),
-                              ],
+  color: MaterialStateProperty.resolveWith<Color?>(
+    (states) => isEvenRow ? Colors.transparent : Colors.grey.shade100,
+  ),
+  cells: [
+    DataCell(Checkbox(
+      value: selectedRows[actualIndex],
+      onChanged: (val) => _toggleRowSelection(val, index),
+    )),
+    DataCell(Text(book['bookId'] ?? 'N/A', style: const TextStyle(color: Colors.black))),
+    DataCell(SizedBox(
+      width: 150,
+      child: Text(
+        book['title'] ?? 'Unknown',
+        overflow: TextOverflow.ellipsis,
+        softWrap: false,
+        style: const TextStyle(color: Colors.black),
+      ),
+    )),
+    DataCell(SizedBox(
+      width: 120,
+      child: Text(
+        book['author'] ?? 'Unknown',
+        overflow: TextOverflow.ellipsis,
+        softWrap: false,
+        style: const TextStyle(color: Colors.black),
+      ),
+    )),
+    DataCell(Text(book['year'] ?? 'N/A', style: const TextStyle(color: Colors.black))),
+    DataCell(Text(book['category'] ?? 'N/A', style: const TextStyle(color: Colors.black))),
+    DataCell(_buildStatusChip(book['condition'] ?? 'N/A')),
+    DataCell(_buildActionIcons(book)),
+  ],
+
                             );
                           }),
                         ),
@@ -220,8 +219,9 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  '${currentPage * rowsPerPage + 1}–${(currentPage * rowsPerPage + currentPageBooks.length)} of ${books.length}',
-                ),
+  '${currentPage * rowsPerPage + 1}–${(currentPage * rowsPerPage + currentPageBooks.length)} of ${books.length}',
+  style: const TextStyle(color: Colors.black),
+),
                 IconButton(
                   icon: const Icon(Icons.first_page),
                   onPressed: currentPage > 0
@@ -300,53 +300,57 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
         onSort: (i, asc) => _sort((d) => d['condition'] ?? '', i, asc),
       ),
       const DataColumn(
-        label: Text(
-          'Action',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
+  label: Text(
+    'Action',
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.black, // 👈 Force black text
+    ),
+  ),
+),
     ];
   }
 
-  Widget _buildActionIcons(Map<String, String> book) {
-    return Row(
-      children: [
-        Tooltip(
-          message: 'View Book',
-          child: IconButton(
-            icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => ViewBookModal(book: book),
-              );
-            },
-          ),
+Widget _buildActionIcons(Map<String, String> book) {
+  return Row(
+    children: [
+      Tooltip(
+        message: 'View Book',
+        child: IconButton(
+          icon: const Icon(Icons.remove_red_eye_outlined, size: 20, color: Colors.black),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => ViewBookModal(book: book),
+            );
+          },
         ),
-        const SizedBox(width: 8),
-        Tooltip(
-          message: 'Edit Book',
-          child: IconButton(
-            icon: const Icon(Icons.edit_outlined, size: 20),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => EditBookForm(initialBookData: book),
-              );
-            },
-          ),
+      ),
+      const SizedBox(width: 8),
+      Tooltip(
+        message: 'Edit Book',
+        child: IconButton(
+          icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.black),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => EditBookForm(initialBookData: book),
+            );
+          },
         ),
-        const SizedBox(width: 8),
-        Tooltip(
-          message: 'Delete Book',
-          child: IconButton(
-            icon: const Icon(Icons.delete_outline, size: 20),
-            onPressed: _showDeleteModal,
-          ),
+      ),
+      const SizedBox(width: 8),
+      Tooltip(
+        message: 'Delete Book',
+        child: IconButton(
+          icon: const Icon(Icons.delete_outline, size: 20, color: Colors.black),
+          onPressed: _showDeleteModal,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
 
   Widget _buildActionButton(
       IconData icon, String label, Color color, VoidCallback? onPressed) {
@@ -366,12 +370,12 @@ class _BookManagementScreenState extends State<BookManagementScreen> {
   }
 
 
-  Widget _buildSortableColumnLabel(String label) {
-    return Text(
-      label,
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    );
-  }
+ Widget _buildSortableColumnLabel(String label) {
+  return Text(
+    label,
+    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+  );
+}
 
   Widget _buildStatusChip(String status) {
     final color = status == 'New'
