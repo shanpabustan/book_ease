@@ -3,7 +3,7 @@ import '../components/sidebar.dart';
 import '../components/adminapp_bar.dart';
 import '../calendar/calendar_main.dart';
 import '../managebook/manage_books_index.dart';
-import '../reservation/reservation_main.dart';
+import '../reservation/reservation_index.dart';
 import '../usermanagement/manage_user_index.dart';
 import '../barrowed_books/barrowed_book.dart';
 import 'stats_section.dart';
@@ -14,7 +14,6 @@ class DashboardTheme {
   static const Color primaryTextColor = Colors.black87;
   static const Color secondaryTextColor = Colors.grey;
   static const Color cardBackground = Colors.white;
-  // static const Color pageBackground = Color(0xFFFAF7F0);
   static const Color pageBackground = Colors.white;
 }
 
@@ -24,7 +23,7 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isSidebarExpanded = true;
   int _selectedIndex = 0;
 
@@ -36,7 +35,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
     setState(() => _selectedIndex = index);
   }
 
-  final List<Widget> _screens = [
+  final List<String> _titles = [
+    "Welcome to the Admin Dashboard",
+    "Manage Books",
+    "Manage Users",
+    "Reservation Overview",
+    "Calendar Schedule",
+    "Borrowed Books",
+  ];
+
+  final List<Widget> _contentScreens = [
     DashboardContent(),
     ManageBook(),
     ManageUser(),
@@ -44,6 +52,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
     CalendarMain(),
     BarrowedBook(),
   ];
+
+  List<Widget> get _screensWithAppBar =>
+      List.generate(_contentScreens.length, (index) {
+        return Container(
+          color: DashboardTheme.pageBackground,
+          child: Column(
+            children: [
+              AppBarWidget(
+                scaffoldKey: _scaffoldKey,
+                title: _titles[index],
+              ),
+              Expanded(child: _contentScreens[index]),
+            ],
+          ),
+        );
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -57,41 +81,32 @@ class _AdminDashboardState extends State<AdminDashboard> {
               selectedIndex: _selectedIndex,
               onItemSelected: _handleNavigation,
             ),
-          Expanded(child: _screens[_selectedIndex]),
+          Expanded(child: _screensWithAppBar[_selectedIndex]),
         ],
       ),
     );
   }
 }
 
+// DashboardContent remains for main dashboard screen (index 0)
 class DashboardContent extends StatelessWidget {
   const DashboardContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: DashboardTheme.pageBackground,
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppBarWidget(scaffoldKey: GlobalKey<ScaffoldState>()),
+          StatsSection(),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  StatsSection(), // StatsSection widget from the new file
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: AnalyticsScreen()),
-                        MostBorrowedBooks(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: AnalyticsScreen()),
+                MostBorrowedBooks(),
+              ],
             ),
           ),
         ],

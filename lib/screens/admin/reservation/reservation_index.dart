@@ -1,19 +1,18 @@
+import 'package:book_ease/screens/admin/reservation/reservation_table.dart';
 import 'package:flutter/material.dart';
 import 'package:book_ease/screens/admin/components/search_admin.dart';
-// ignore: unused_import
-import 'package:book_ease/widgets/admin_buttons_widget.dart';
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
 import 'package:book_ease/screens/admin/admin_theme.dart';
-import 'package:book_ease/screens/admin/usermanagement/manage_user_table.dart';
+// Replace with your actual reservation table widget
 
-class ManageUser extends StatefulWidget {
-  const ManageUser({super.key});
+class ReservationMain extends StatefulWidget {
+  const ReservationMain({super.key});
 
   @override
-  _ManageUserState createState() => _ManageUserState();
+  State<ReservationMain> createState() => _ReservationMainState();
 }
 
-class _ManageUserState extends State<ManageUser> {
+class _ReservationMainState extends State<ReservationMain> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -33,7 +32,7 @@ class _ManageUserState extends State<ManageUser> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "User List",
+                    "Reservations",
                     style: TextStyle(
                       fontSize: AdminFontSize.subHeading,
                       fontWeight: FontWeight.bold,
@@ -42,15 +41,15 @@ class _ManageUserState extends State<ManageUser> {
                   ),
                   const Padding(
                     padding: EdgeInsets.only(right: 16.0),
-                    child: SearchAdmin(hintText: 'Search users...'),
+                    child: SearchAdmin(hintText: 'Search reservations...'),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
 
-              // User Table Section
+              // Reservation Table Section
               Expanded(
-                child: UserManagementApp(),
+                child: ReservationScreen(), // You should define this widget
               ),
 
               const SizedBox(height: 20),

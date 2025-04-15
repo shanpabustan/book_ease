@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:book_ease/screens/admin/usermanagement/view_user.dart';
 import 'package:book_ease/utils/snackbar_util.dart';
 import 'package:book_ease/modals/unblock_data_modal.dart';
-import 'user_data.dart';
+import 'package:dio/dio.dart'; // Add Dio import
 
 class UserManagementApp extends StatelessWidget {
   @override
@@ -30,36 +30,75 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   int? sortColumnIndex;
   bool isAllSelected = false;
   bool isButtonEnabled = false;
+  bool isLoading = true;
 
   int currentPage = 0;
   int rowsPerPage = 8;
 
-  List<Map<String, String>> users = List.from(userList);
+  List<Map<String, String>> users = [];
   List<bool> selectedRows = [];
 
   @override
   void initState() {
     super.initState();
     selectedRows = List.generate(users.length, (_) => false);
+    _fetchUsers(); // Fetch users data when the screen is initialized
   }
+
+  Future<void> _fetchUsers() async {
+  final dio = Dio();
+  final url = 'http://127.0.0.1:5566/admin/get-users';
+
+  setState(() {
+    isLoading = true; // Show loading indicator
+  });
+
+  try {
+    final response = await dio.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data['data'];
+
+      List<Map<String, dynamic>> fetchedUsers = data.map((user) {
+        return {
+          'userId': user['user_id'].toString(),
+          'name': user['name'],
+          'email': user['email'],
+          'course': user['program'] ?? 'N/A',
+          'status': user['is_active'] ? 'Active' : 'Blocked',
+          'phoneNumber': user['contact_number'] ?? 'N/A',
+          'yearLevel': user['year_level']?.toString() ?? 'N/A',
+        };
+      }).toList();
+
+      setState(() {
+        users = fetchedUsers.map((user) => user.map((key, value) => MapEntry(key, value.toString()))).toList();
+        selectedRows = List.generate(users.length, (_) => false);
+        isLoading = false;
+      });
+    } else {
+      showCustomSnackBar(context, message: 'Failed to load users', backgroundColor: Colors.red);
+      setState(() => isLoading = false);
+    }
+  } catch (e) {
+    showCustomSnackBar(context, message: 'Error fetching data: $e', backgroundColor: Colors.red);
+    setState(() => isLoading = false);
+  }
+}
 
   List<List<Map<String, String>>> get paginatedUsers {
     List<List<Map<String, String>>> chunks = [];
     for (int i = 0; i < users.length; i += rowsPerPage) {
-      chunks.add(users.sublist(
-          i, i + rowsPerPage > users.length ? users.length : i + rowsPerPage));
+      chunks.add(users.sublist(i, i + rowsPerPage > users.length ? users.length : i + rowsPerPage));
     }
     return chunks;
   }
 
-  void _sort<T>(Comparable<T> Function(Map<String, String> d) getField,
-      int columnIndex, bool ascending) {
+  void _sort<T>(Comparable<T> Function(Map<String, String> d) getField, int columnIndex, bool ascending) {
     users.sort((a, b) {
       final aValue = getField(a);
       final bValue = getField(b);
-      return ascending
-          ? Comparable.compare(aValue, bValue)
-          : Comparable.compare(bValue, aValue);
+      return ascending ? Comparable.compare(aValue, bValue) : Comparable.compare(bValue, aValue);
     });
     setState(() {
       this.ascending = ascending;
@@ -71,9 +110,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     setState(() {
       isAllSelected = value ?? false;
       int start = currentPage * rowsPerPage;
-      int end = (start + rowsPerPage > users.length)
-          ? users.length
-          : start + rowsPerPage;
+      int end = (start + rowsPerPage > users.length) ? users.length : start + rowsPerPage;
       for (int i = start; i < end; i++) {
         selectedRows[i] = isAllSelected;
       }
@@ -96,11 +133,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
   void _checkSelectAllState() {
     int start = currentPage * rowsPerPage;
-    int end = (start + rowsPerPage > users.length)
-        ? users.length
-        : start + rowsPerPage;
-    isAllSelected =
-        selectedRows.sublist(start, end).every((selected) => selected);
+    int end = (start + rowsPerPage > users.length) ? users.length : start + rowsPerPage;
+    isAllSelected = selectedRows.sublist(start, end).every((selected) => selected);
   }
 
   void _nextPage() {
@@ -154,8 +188,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  Widget _buildActionButton(
-      IconData icon, String label, Color color, VoidCallback? onPressed) {
+  Widget _buildActionButton(IconData icon, String label, Color color, VoidCallback? onPressed) {
     return OutlinedButton.icon(
       onPressed: isButtonEnabled ? onPressed : null,
       icon: Icon(icon, color: isButtonEnabled ? color : Colors.grey),
@@ -179,15 +212,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       ],
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Map<String, String>> currentPageUsers = paginatedUsers[currentPage];
-    return Scaffold(
-      backgroundColor: const Color(0xFFF3F6F9),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+@override
+Widget build(BuildContext context) {
+  List<Map<String, String>> currentPageUsers = paginatedUsers[currentPage];
+  return Scaffold(
+    backgroundColor: const Color(0xFFF3F6F9),
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
           children: [
             // Header Actions
             Row(
@@ -211,8 +245,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: ConstrainedBox(
-                        constraints:
-                            BoxConstraints(minWidth: constraints.maxWidth),
+                        constraints: BoxConstraints(minWidth: constraints.maxWidth),
                         child: DataTable(
                           sortColumnIndex: sortColumnIndex,
                           sortAscending: ascending,
@@ -262,10 +295,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                             final actualIndex =
                                 currentPage * rowsPerPage + index;
                             return DataRow(
-                              color: WidgetStateColor.resolveWith((states) =>
-                                  index.isEven
-                                      ? Colors.transparent
-                                      : Colors.grey.shade100),
+                              color: MaterialStateColor.resolveWith(
+                                  (states) =>
+                                      index.isEven
+                                          ? Colors.transparent
+                                          : Colors.grey.shade100),
                               cells: [
                                 DataCell(Checkbox(
                                   value: selectedRows[actualIndex],

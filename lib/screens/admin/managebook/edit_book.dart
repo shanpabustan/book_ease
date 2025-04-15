@@ -9,9 +9,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:book_ease/screens/admin/admin_theme.dart';
 
 class EditBookForm extends StatefulWidget {
-  final Map<String, dynamic> initialBookData; // Receiving initial data
+  final Map<String, dynamic> book; // Receiving initial data
 
-  const EditBookForm({Key? key, required this.initialBookData})
+  const EditBookForm({Key? key, required this.book})
       : super(key: key);
 
   @override
@@ -38,11 +38,10 @@ class _EditBookFormState extends State<EditBookForm> {
   File? _pickedImage;
 
   final List<String> _baseCategories = [
-    'Programming',
-    'Fiction',
-    'Non Fiction',
-    'Data Science',
-    'Machine Learning',
+    'Information System',
+    'Computer Science',
+    'Engineering',
+    'Mathematics',
     'Others',
   ];
   List<String> _categories = [];
@@ -54,33 +53,35 @@ class _EditBookFormState extends State<EditBookForm> {
     super.initState();
     _categories = List.from(_baseCategories);
 
+    
+
     // Initialize controllers with data passed from the parent widget
     _bookIdController =
-        TextEditingController(text: widget.initialBookData['bookId']);
+        TextEditingController(text: widget.book['bookId']);
     _titleController =
-        TextEditingController(text: widget.initialBookData['title']);
+        TextEditingController(text: widget.book['title']);
     _authorController =
-        TextEditingController(text: widget.initialBookData['author']);
+        TextEditingController(text: widget.book['author']);
     _yearController =
-        TextEditingController(text: widget.initialBookData['year']);
+        TextEditingController(text: widget.book['year']);
     _versionController =
-        TextEditingController(text: widget.initialBookData['version']);
+        TextEditingController(text: widget.book['version']);
     _isbnController =
-        TextEditingController(text: widget.initialBookData['isbn']);
+        TextEditingController(text: widget.book['isbn']);
     _totalCopiesController =
-        TextEditingController(text: widget.initialBookData['copies']);
+        TextEditingController(text: widget.book['copies']);
     _sectionController =
-        TextEditingController(text: widget.initialBookData['section']);
+        TextEditingController(text: widget.book['section']);
     _shelfLocationController =
-        TextEditingController(text: widget.initialBookData['shelfLocation']);
+        TextEditingController(text: widget.book['shelfLocation']);
     _descriptionController =
-        TextEditingController(text: widget.initialBookData['description']);
+        TextEditingController(text: widget.book['description']);
     _customCategoryController = TextEditingController();
 
-    _selectedCategory = widget.initialBookData['category'];
-    _selectedCondition = widget.initialBookData['condition'];
-    if (widget.initialBookData['image'] != null) {
-      _pickedImage = File(widget.initialBookData['image']);
+    _selectedCategory = widget.book['category'];
+    _selectedCondition = widget.book['condition'];
+    if (widget.book['image'] != null) {
+      _pickedImage = File(widget.book['image']);
     }
   }
 
@@ -186,7 +187,7 @@ class _EditBookFormState extends State<EditBookForm> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -232,6 +233,7 @@ class _EditBookFormState extends State<EditBookForm> {
               ),
             ),
 
+            
             // Scrollable Content
             Expanded(
               child: SingleChildScrollView(
@@ -259,7 +261,10 @@ class _EditBookFormState extends State<EditBookForm> {
                                   ),
                                   child: Column(
                                     children: [
-                                      const Text('Upload Image'),
+                                        const Text(
+                                        'Upload Image',
+                                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                        ),
                                       const SizedBox(height: 12),
                                       _pickedImage != null
                                           ? ClipRRect(
@@ -293,7 +298,8 @@ class _EditBookFormState extends State<EditBookForm> {
                                         ))
                                     .toList(),
                                 decoration: InputDecoration(
-                                  labelText: 'Category',
+                                    labelText: 'Category',
+                                    labelStyle: const TextStyle(color: Colors.black),
                                   floatingLabelStyle: const TextStyle(
                                     color: AdminColor.secondaryBackgroundColor,
                                   ),
@@ -322,6 +328,7 @@ class _EditBookFormState extends State<EditBookForm> {
                                 CustomTextFormField(
                                   controller: _customCategoryController,
                                   label: 'Enter Custom Category',
+                                                                   
                                 ),
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
@@ -335,6 +342,7 @@ class _EditBookFormState extends State<EditBookForm> {
                                     .toList(),
                                 decoration: InputDecoration(
                                   labelText: 'Condition',
+                                  labelStyle: const TextStyle(color: Colors.black),
                                   floatingLabelStyle: const TextStyle(
                                     color: AdminColor.secondaryBackgroundColor,
                                   ),
@@ -355,9 +363,11 @@ class _EditBookFormState extends State<EditBookForm> {
                                     ? 'Please select a condition'
                                     : null,
                               ),
+
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: _descriptionController,
+                                style: const TextStyle(color: Colors.black),
                                 maxLines:
                                     5, // Increase this value for more height
                                 decoration: InputDecoration(
@@ -406,6 +416,7 @@ class _EditBookFormState extends State<EditBookForm> {
                                   style: TextStyle(
                                     fontSize: AdminFontSize.subHeading,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.black
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -501,6 +512,7 @@ class _EditBookFormState extends State<EditBookForm> {
                             ),
                           ),
                         ),
+                        
 
                         // CUT THIS
                       ],
@@ -530,7 +542,7 @@ class CustomTextFormField extends StatelessWidget {
     this.keyboardType,
   });
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -538,8 +550,10 @@ class CustomTextFormField extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
+        style: const TextStyle(color: Colors.black), // 👈 This is the fix!
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: const TextStyle(color: Colors.black),
           floatingLabelStyle:
               const TextStyle(color: AdminColor.secondaryBackgroundColor),
           focusedBorder: OutlineInputBorder(

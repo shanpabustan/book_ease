@@ -1,10 +1,12 @@
 import 'package:book_ease/screens/admin/components/search_admin.dart';
 import 'package:flutter/material.dart';
-import 'package:book_ease/screens/admin/components/adminapp_bar.dart';
+// import 'package:book_ease/screens/admin/components/adminapp_bar.dart';
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
 import 'package:book_ease/screens/admin/managebook/book_management_table.dart';
 import 'package:book_ease/screens/admin/managebook/add_book_form.dart';
 import 'package:book_ease/screens/admin/admin_theme.dart';
+
+import '../components/adminapp_bar.dart';
 
 class ManageBook extends StatelessWidget {
   const ManageBook({super.key});
@@ -15,7 +17,7 @@ class ManageBook extends StatelessWidget {
       backgroundColor: DashboardTheme.pageBackground,
       body: Column(
         children: [
-          AppBarWidget(scaffoldKey: GlobalKey<ScaffoldState>()),
+          AppBarWidget(scaffoldKey: GlobalKey<ScaffoldState>(), title: '',),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),

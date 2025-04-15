@@ -14,7 +14,7 @@ class ManageUser extends StatelessWidget {
       backgroundColor: DashboardTheme.pageBackground,
       body: Column(
         children: [
-          AppBarWidget(scaffoldKey: GlobalKey<ScaffoldState>()),
+          AppBarWidget(scaffoldKey: GlobalKey<ScaffoldState>(), title: '',),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),

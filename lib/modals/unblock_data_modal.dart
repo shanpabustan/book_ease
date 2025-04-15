@@ -65,7 +65,7 @@ class UnblockDataModal extends StatelessWidget {
                   const Expanded(
                     child: Text(
                       'Are you sure you want to unblock this user? This action cannot be undone.',
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ),
                 ],

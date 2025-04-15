@@ -65,7 +65,9 @@ class DeleteDataModal extends StatelessWidget {
                   const Expanded(
                     child: Text(
                       'Are you sure you want to delete this data? This action cannot be undone.',
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: Colors.black),
+                     
+                      
                     ),
                   ),
                 ],

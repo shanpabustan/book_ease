@@ -1,3 +1,4 @@
+import 'package:book_ease/screens/admin/managebook/book_management_table.dart';
 import 'package:book_ease/screens/user/library/library_main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';  // Import provider
 import 'package:book_ease/provider/user_data.dart';// Import your UserData provider
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
 import 'package:book_ease/provider/book_provider.dart';
+import 'package:book_ease/provider/notification_provider.dart';
 
 
 const Color secondaryColor = Color.fromRGBO(49, 120, 115, 1);
@@ -37,6 +39,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserData()),
         ChangeNotifierProvider(create: (_) => BookProvider()), // ✅ Add this
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -54,8 +57,9 @@ class MyApp extends StatelessWidget {
          ),
        ),
         //home:LibraryScreen(),
-        //home:LogBookEaseApp(),
-       home: AdminDashboard(),  //  // Main screen after login or wherever you direct
+        home:LogBookEaseApp(),
+        //home:BookManagementScreen(),
+       //home: AdminDashboard(),  //  // Main screen after login or wherever you direct
       ),
     );
   }

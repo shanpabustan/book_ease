@@ -1,3 +1,4 @@
+import 'dart:convert'; // Import this for base64 decoding
 import 'package:flutter/material.dart';
 import 'package:book_ease/screens/admin/admin_theme.dart';
 
@@ -78,14 +79,7 @@ class ViewBookModal extends StatelessWidget {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Image.asset(
-                                    book['image']!,
-                                    height: 200,
-                                    fit: BoxFit.contain,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Text("Image not found"),
-                                  ),
+                                  child: _buildImage(book['image']!),
                                 ),
                               ),
                             ),
@@ -108,6 +102,7 @@ class ViewBookModal extends StatelessWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
+                                    color: Colors.black,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -153,6 +148,7 @@ class ViewBookModal extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: AdminFontSize.subHeading,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -214,6 +210,16 @@ class ViewBookModal extends StatelessWidget {
       ),
     );
   }
+
+  // Decode base64 and display the image
+  Widget _buildImage(String base64Image) {
+    try {
+      final bytes = base64Decode(base64Image.split(',').last);
+      return Image.memory(bytes, height: 200, fit: BoxFit.contain);
+    } catch (e) {
+      return const Text("Image not found");
+    }
+  }
 }
 
 Widget _buildTextField({required String label, required String value}) {
@@ -222,7 +228,13 @@ Widget _buildTextField({required String label, required String value}) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black, // <- Set label color to black
+          ),
+        ),
         const SizedBox(height: 6),
         TextFormField(
           initialValue: value,

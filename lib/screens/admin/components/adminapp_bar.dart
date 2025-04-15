@@ -1,37 +1,77 @@
+// lib/widgets/appbar_widget.dart
+import 'package:book_ease/provider/notification_provider.dart';
+import 'package:book_ease/screens/admin/dashboard/notification_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+class AppBarWidget extends StatefulWidget implements PreferredSizeWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
+  final String title;
 
-  const AppBarWidget({required this.scaffoldKey, Key? key}) : super(key: key);
+  const AppBarWidget({
+    required this.scaffoldKey,
+    required this.title,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  State<AppBarWidget> createState() => _AppBarWidgetState();
+}
+
+class _AppBarWidgetState extends State<AppBarWidget> {
+  final GlobalKey _notifIconKey = GlobalKey();
+  OverlayEntry? _popupEntry;
+
+  void _toggleNotificationPopup(BuildContext context) {
+    if (_popupEntry != null) {
+      _popupEntry!.remove();
+      _popupEntry = null;
+      return;
+    }
+
+    final RenderBox renderBox =
+        _notifIconKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+
+    _popupEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy + 40,
+        left: position.dx - 280,
+        child: const NotificationPopup(),
+      ),
+    );
+
+    Overlay.of(context).insert(_popupEntry!);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = context.watch<NotificationProvider>().unreadCount;
+
     return Card(
-      elevation: 2, // Reduced the shadow by lowering the elevation
-      margin: EdgeInsets.all(10), // Adds spacing around the card
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15), // Rounded corners
-      ),
-      color: Colors.white, // Background color changed to white
+      elevation: 2,
+      margin: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      color: Colors.white,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Left Side - Welcome Message
             Row(
               children: [
                 if (MediaQuery.of(context).size.width < 800)
                   IconButton(
-                    icon: Icon(Icons.menu, color: Colors.black87),
-                    onPressed: () {
-                      scaffoldKey.currentState?.openDrawer();
-                    },
+                    icon: const Icon(Icons.menu, color: Colors.black87),
+                    onPressed: () =>
+                        widget.scaffoldKey.currentState?.openDrawer(),
                   ),
                 Text(
-                  "Welcome to the Admin Dashboard",
-                  style: TextStyle(
+                  widget.title,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
@@ -39,42 +79,37 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ],
             ),
-
-            // Right Side - Profile & Notifications
             Row(
               children: [
-                // Notifications Icon with Badge
+                // NOTIFICATION ICON WITH TOGGLE
                 Stack(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.notifications, color: Colors.black87),
-                      onPressed: () {
-                        // Handle notification tap
-                      },
+                      key: _notifIconKey,
+                      icon: const Icon(Icons.notifications,
+                          color: Colors.black87),
+                      onPressed: () => _toggleNotificationPopup(context),
                     ),
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.red,
-                        radius: 6,
-                        child: Text(
-                          '3', // Sample notification count
-                          style: TextStyle(fontSize: 10, color: Colors.white),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.red,
+                          radius: 6,
+                          child: Text(
+                            unreadCount.toString(),
+                            style: const TextStyle(
+                                fontSize: 10, color: Colors.white),
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
-
-                // Profile Avatar
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage(
-                        'assets/images/lebron.png'), // Change to actual path
-                  ),
+                const SizedBox(width: 10),
+                const CircleAvatar(
+                  radius: 20,
+                  backgroundImage: AssetImage('assets/images/lebron.png'),
                 ),
               ],
             ),
@@ -83,8 +118,4 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
-  @override
-  Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight); // Define the preferred height for appBar
 }

@@ -1,7 +1,6 @@
 import 'package:book_ease/screens/admin/components/search_admin.dart';
 import 'package:book_ease/widgets/admin_buttons_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:book_ease/screens/admin/components/adminapp_bar.dart';
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
 import 'package:book_ease/screens/admin/managebook/book_management_table.dart';
 import 'package:book_ease/screens/admin/managebook/add_book_form.dart';
@@ -25,8 +24,6 @@ class _ManageBookState extends State<ManageBook> {
       backgroundColor: DashboardTheme.pageBackground,
       body: Column(
         children: [
-          // AppBar with scaffold key
-          AppBarWidget(scaffoldKey: _scaffoldKey),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(

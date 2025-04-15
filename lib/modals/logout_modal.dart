@@ -65,7 +65,7 @@ class LogoutModal extends StatelessWidget {
                   const Expanded(
                     child: Text(
                       'Are you sure you want to log out? You will need to sign in again to access your account.',
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14,color: Colors.black),
                     ),
                   ),
                 ],
