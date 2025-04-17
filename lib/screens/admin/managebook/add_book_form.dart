@@ -474,8 +474,7 @@ class _AddBookFormState extends State<AddBookForm> {
   final TextEditingController _shelfLocationController =
       TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _customCategoryController =
-      TextEditingController();
+  final TextEditingController _customCategoryController = TextEditingController();
 
   String? _selectedCategory;
   String? _selectedCondition;
@@ -499,10 +498,10 @@ class _AddBookFormState extends State<AddBookForm> {
     _categories = List.from(_baseCategories);
   }
 
-  // Method to pick an image
-
+    // Method to pick an image
   void _pickImage() async {
     if (!kIsWeb) {
+      // Check for permissions explicitly
       var status = await Permission.photos.request();
       if (!status.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -513,9 +512,21 @@ class _AddBookFormState extends State<AddBookForm> {
     }
 
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
     if (result != null && result.files.single.path != null) {
       setState(() {
-        _pickedImage = File(result.files.single.path!);
+        if (result != null) {
+            if (kIsWeb) {
+              setState(() {
+                _webImageBytes = result.files.single.bytes;
+                _pickedImage = File(''); // Dummy to show something is picked
+              });
+            } else {
+              setState(() {
+                _pickedImage = File(result.files.single.path!);
+              });
+            }
+          }
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -546,84 +557,114 @@ class _AddBookFormState extends State<AddBookForm> {
   }
 
   void _saveForm() async {
-    if (_formKey.currentState!.validate()) {
-      if (_pickedImage == null) {
+  if (_formKey.currentState!.validate()) {
+    // Check if image is null
+    if (_pickedImage == null && _webImageBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please upload an image')),
+      );
+      return;
+    }
+
+    // Handle custom category if "Others" was selected
+    if (_selectedCategory == 'Others') {
+      final customCategory = _customCategoryController.text.trim();
+      if (customCategory.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload an image')),
+          const SnackBar(content: Text('Please enter a custom category')),
         );
         return;
       }
 
-      // Handle custom category if "Others" was selected
-      if (_selectedCategory == 'Others') {
-        final customCategory = _customCategoryController.text.trim();
-        if (customCategory.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please enter a custom category')),
-          );
-          return;
-        }
-
-        if (!_categories.contains(customCategory)) {
-          setState(() {
-            _categories.insert(
-                _categories.length - 1, customCategory); // Before 'Others'
-            _selectedCategory = customCategory;
-          });
-        }
+      if (!_categories.contains(customCategory)) {
+        setState(() {
+          _categories.insert(_categories.length - 1, customCategory);
+        });
       }
 
-      try {
-        final bytes =
-            kIsWeb ? _webImageBytes! : await _pickedImage!.readAsBytes();
-        final base64Image = base64Encode(bytes);
+      _selectedCategory = customCategory; // ✅ Ensure it's assigned for submission
+    } else {
+      _customCategoryController.clear(); // ✅ Clean up if not using "Others"
+    }
 
-        final bookData = {
-          'book_id': int.parse(_bookIdController.text),
-          'title': _titleController.text,
-          'author': _authorController.text,
-          'category': _selectedCategory,
-          'isbn': _isbnController.text,
-          'library_section': _sectionController.text,
-          'shelf_location': _shelfLocationController.text,
-          'total_copies': int.parse(_totalCopiesController.text),
-          'available_copies': int.parse(_totalCopiesController.text),
-          'book_condition': _selectedCondition,
-          'picture': base64Image,
-          'year_published': int.parse(_yearController.text),
-          'version': int.parse(_versionController.text),
-          'description': _descriptionController.text,
-        };
+    // Ensure image is available before proceeding
+    Uint8List bytes;
+    if (kIsWeb) {
+      if (_webImageBytes == null) {
+        print("Error: _webImageBytes is null on web.");
+        return;
+      }
+      bytes = _webImageBytes!;
+    } else {
+      if (_pickedImage == null) {
+        print("Error: _pickedImage is null on mobile.");
+        return;
+      }
+      bytes = await _pickedImage!.readAsBytes();
+    }
+    final base64Image = base64Encode(bytes);
 
-        final dio = Dio();
-        final response = await dio.post(
-          '${ApiConfig.baseUrl}/admin/add-book', // 🔁 Replace with your actual API URL
-          data: bookData,
-          options: Options(
-            headers: {'Content-Type': 'application/json'},
-          ),
-        );
+    // ✅ Debug print each field before submission
+    print('book_id: ${_bookIdController.text}');
+    print('title: ${_titleController.text}');
+    print('author: ${_authorController.text}');
+    print('category: $_selectedCategory');
+    print('isbn: ${_isbnController.text}');
+    print('library_section: ${_sectionController.text}');
+    print('shelf_location: ${_shelfLocationController.text}');
+    print('total_copies: ${_totalCopiesController.text}');
+    print('available_copies: ${_totalCopiesController.text}');
+    print('book_condition: $_selectedCondition');
+    print('picture: ${_pickedImage != null}');
+    print('year_published: ${_yearController.text}');
+    print('version: ${_versionController.text}');
+    print('description: ${_descriptionController.text}');
 
-        if (response.statusCode == 200 && response.data['retCode'] == '200') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Book added successfully')),
-          );
-          Navigator.pop(context);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text('Failed to add book: ${response.data['message']}')),
-          );
-        }
-      } catch (e) {
-        print('Error during book submission: $e');
+    final bookData = {
+      'book_id': int.tryParse(_bookIdController.text) ?? 0,
+      'title': _titleController.text.trim(),
+      'author': _authorController.text.trim(),
+      'category': _selectedCategory,
+      'isbn': _isbnController.text.trim(),
+      'library_section': _sectionController.text.trim(),
+      'shelf_location': _shelfLocationController.text.trim(),
+      'total_copies': int.tryParse(_totalCopiesController.text) ?? 0,
+      'available_copies': int.tryParse(_totalCopiesController.text) ?? 0,
+      'book_condition': _selectedCondition,
+      'picture': base64Image,
+      'year_published': int.tryParse(_yearController.text) ?? 0,
+      'version': int.tryParse(_versionController.text) ?? 1,
+      'description': _descriptionController.text.trim(),
+    };
+
+    print('Final bookData JSON: ${jsonEncode(bookData)}'); // ✅ Show full payload
+
+    try {
+      final dio = Dio();
+      final response = await dio.post(
+        '${ApiConfig.baseUrl}/admin/add-book',
+        data: bookData,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200 && response.data['retCode'] == '200') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error adding book. Please try again.')),
+          const SnackBar(content: Text('Book added successfully')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add book: ${response.data['message']}')),
         );
       }
+    } catch (e) {
+      print('Error during book submission: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error adding book. Please try again.')),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -690,43 +731,43 @@ class _AddBookFormState extends State<AddBookForm> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  GestureDetector(
-                                    onTap: _pickImage,
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.grey.shade300),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          const Text('Upload Image'),
-                                          const SizedBox(height: 12),
-                                          _pickedImage != null
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: kIsWeb
-                                                      ? Image.network(
-                                                          _pickedImage!.path,
-                                                          height: 160,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                      : Image.file(
-                                                          _pickedImage!,
-                                                          height: 160,
-                                                          fit: BoxFit.cover,
-                                                        ),
+                        GestureDetector(
+                          onTap:
+                              _pickImage, // Call the _pickImage function here
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text('Upload Image'),
+                                const SizedBox(height: 12),
+                                _pickedImage != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: kIsWeb
+                                              ? (_webImageBytes != null
+                                                  ? Image.memory(
+                                                      _webImageBytes!,
+                                                      height: 160,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : const Icon(Icons.image, size: 100, color: Colors.grey))
+                                              : Image.file(
+                                                  _pickedImage!,
+                                                  height: 160,
+                                                  fit: BoxFit.cover,
                                                 )
-                                              : const Icon(Icons.image,
-                                                  size: 100,
-                                                  color: Colors.grey),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                      )
+                                    : const Icon(Icons.image,
+                                        size: 100, color: Colors.grey),
+                              ],
+                            ),
+                          ),
+                        ),
                                   const SizedBox(height: 16),
                                   DropdownButtonFormField<String>(
                                     value: _selectedCategory,

@@ -87,10 +87,8 @@ void initState() {
   Future.microtask(() {
     final userId = Provider.of<UserData>(context, listen: false).userID;
     final bookProvider = Provider.of<BookProvider>(context, listen: false);
-    if (userId != null) {
-      bookProvider.fetchBorrowedBooks(userId);
-    }
-  });
+    bookProvider.fetchBorrowedBooks(userId);
+    });
 }
 
   

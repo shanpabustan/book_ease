@@ -2,7 +2,7 @@ import 'package:book_ease/screens/admin/components/search_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:book_ease/screens/admin/components/adminapp_bar.dart';
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
-import 'package:book_ease/screens/admin/usermanagement/user_management_table.dart';
+import 'package:book_ease/screens/admin/usermanagement/manage_user_table.dart';
 import 'package:book_ease/screens/admin/usermanagement/add_user_form.dart'; // Import AddBookForm
 
 class ManageUser extends StatelessWidget {
@@ -78,7 +78,7 @@ class ManageUser extends StatelessWidget {
                   const SizedBox(height: 20),
                   // Book Management Table
                   Expanded(
-                    child: UserManagementTable(),
+                    child: UserManagementScreen(),
                   ),
                 ],
               ),

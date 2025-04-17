@@ -109,7 +109,7 @@ class _AppBarWidgetState extends State<AppBarWidget> {
                 const SizedBox(width: 10),
                 const CircleAvatar(
                   radius: 20,
-                  backgroundImage: AssetImage('assets/images/lebron.png'),
+                  backgroundImage: AssetImage('assets/images/bini.jpg'),
                 ),
               ],
             ),
