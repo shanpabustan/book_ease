@@ -1,3 +1,4 @@
+import 'package:book_ease/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
@@ -14,7 +15,7 @@ class _UserManagementTableState extends State<UserManagementTable> {
   String? _error;
 
   final Dio _dio = Dio();
-  final String baseUrl = 'http://127.0.0.1:5566/admin/get-users'; // Replace with your actual API URL
+  final String baseUrl = '${ApiConfig.baseUrl}/admin/get-users'; // Replace with your actual API URL
 
   @override
   void initState() {

@@ -18,7 +18,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<BookProvider>(context, listen: false).fetchBooks();
+    // Make sure the fetchBooks function is called after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BookProvider>(context, listen: false).fetchBooks();
+    });
   }
 
   @override
@@ -64,7 +67,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 itemBuilder: (context, index) {
                   final book = books[index];
                   return GestureDetector(
-                    onTap: () => _showBookDetails(context, book, userId), // PASSED USER ID TO MODAL
+                    onTap: () => _showBookDetails(context, book, userId),
                     child: BookTile(
                       title: book.title,
                       author: book.author,
@@ -81,7 +84,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // UPDATED METHOD SIGNATURE TO ACCEPT USER ID
   void _showBookDetails(BuildContext context, dynamic book, String userId) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -129,7 +131,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            const SizedBox(height: 16),
                             _infoRow("Author", book.author, fontSize: 15),
                             _infoRow("Year Published", book.year, fontSize: 15),
                             _infoRow("ISBN", book.isbn, fontSize: 15),
@@ -154,14 +155,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: () {
-                        showReservationModal(
-                      context,
-                      book.title,
-                      book.copies,
-                      book.bookId, // Pass bookId here
-                      userId, // Pass userId here
-                    );
-
+                          showReservationModal(
+                            context,
+                            book.title,
+                            book.copies,
+                            book.bookId, // Pass bookId here
+                            userId, // Pass userId here
+                          );
                         },
                         icon: const Icon(Icons.check, color: Colors.white),
                         label: const Text("Reserve", style: TextStyle(color: Colors.white)),
@@ -226,7 +226,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         break;
     }
   }
-
+  
   NavigationBarWidget({required int selectedIndex, required void Function(dynamic index) onTabChange}) {}
 }
 

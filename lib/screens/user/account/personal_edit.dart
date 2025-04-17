@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:book_ease/provider/user_data.dart';
 import 'package:dio/dio.dart';
+import 'package:book_ease/base_url.dart';
+
 class PersonalInfoEditScreen extends StatefulWidget {
   const PersonalInfoEditScreen({super.key});
 
@@ -69,7 +71,7 @@ class _PersonalInfoEditScreenState extends State<PersonalInfoEditScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         final response = await _dio.put(
-          'http://127.0.0.1:5566/stud/edit',
+          '${ApiConfig.baseUrl}/stud/edit',
           data: {
             "user_id": _studentIdController.text,
             "first_name": _firstNameController.text,

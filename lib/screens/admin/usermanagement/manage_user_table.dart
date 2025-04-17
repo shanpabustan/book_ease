@@ -1,3 +1,4 @@
+import 'package:book_ease/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:book_ease/screens/admin/usermanagement/view_user.dart';
@@ -47,7 +48,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
   Future<void> _fetchUsers() async {
   final dio = Dio();
-  final url = 'http://127.0.0.1:5566/admin/get-users';
+  final url = '${ApiConfig.baseUrl}/admin/get-users';
 
   setState(() {
     isLoading = true; // Show loading indicator

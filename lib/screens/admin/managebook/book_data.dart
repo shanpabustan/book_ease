@@ -1,10 +1,11 @@
+import 'package:book_ease/base_url.dart';
 import 'package:dio/dio.dart';
 
 final Dio dio = Dio();
 
 Future<List<Map<String, String>>> fetchBookList() async {
   try {
-    final response = await dio.get('http://127.0.0.1:5566/get-all');
+    final response = await dio.get('${ApiConfig.baseUrl}/get-all');
 
     if (response.statusCode == 200) {
       final responseBody = response.data;

@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';  // Import provider
 import 'package:book_ease/provider/user_data.dart';// Import your UserData provider
 import 'package:book_ease/screens/admin/dashboard/dashboard_screen.dart';
+import 'package:book_ease/base_url.dart';
 
 void main() {
   runApp(const LogBookEaseApp());
@@ -44,7 +45,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final Dio dio = Dio();
 
     // 🔥 Use the correct API URL (Replace with your actual API URL if needed)
-    const String apiUrl = "http://127.0.0.1:5566/stud/login"; // Replace with your API URL
+    final String apiUrl = "${ApiConfig.baseUrl}/stud/login"; // Replaces const with final
+
 
     try {
       // Make POST request with the correct body

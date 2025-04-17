@@ -7,8 +7,6 @@ import 'package:book_ease/modals/unblock_data_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
-import 'dart:convert';
-
 
 class ReservationTable extends StatelessWidget {
   const ReservationTable({super.key});
@@ -31,39 +29,40 @@ class ReservationScreen extends StatefulWidget {
 }
 
 class _ReservationScreenState extends State<ReservationScreen> {
-  late TableController<Map<String, String>> controller;
-@override
-void initState() {
-  super.initState();
-  fetchReservations();
-}
+  TableController<Map<String, String>>? controller;
 
-Future<void> fetchReservations() async {
-  try {
-    final response = await Dio().get('http://127.0.0.1:5566/admin/get-reservations'); // Update with your real API URL
-    final List<dynamic> data = response.data;
-
-    final List<Map<String, String>> parsedList = data.map((json) {
-      final reservation = Reservation.fromJson(json);
-      return {
-        'reservationId': reservation.reservationId.toString(),
-        'userName': reservation.fullName,
-        'bookTitle': reservation.bookTitle,
-        'reservationDate': reservation.createdAt.toIso8601String().split('T').first,
-        'status': reservation.status,
-      };
-    }).toList();
-
-    setState(() {
-      controller = TableController<Map<String, String>>(
-        dataList: parsedList,
-        onPageChange: () => setState(() {}),
-      );
-    });
-  } catch (e) {
-    print('Error fetching reservations: $e');
+  @override
+  void initState() {
+    super.initState();
+    fetchReservations();
   }
-}
+
+  Future<void> fetchReservations() async {
+    try {
+      final response = await Dio().get('http://127.0.0.1:5566/admin/get-reservations');
+      final List<dynamic> data = response.data;
+
+      final List<Map<String, String>> parsedList = data.map((json) {
+        final reservation = Reservation.fromJson(json);
+        return {
+          'reservationId': reservation.reservationId.toString(),
+          'userName': reservation.fullName,
+          'bookTitle': reservation.bookTitle,
+          'reservationDate': reservation.createdAt.toIso8601String().split('T').first,
+          'status': reservation.status,
+        };
+      }).toList();
+
+      setState(() {
+        controller = TableController<Map<String, String>>(
+          dataList: parsedList,
+          onPageChange: () => setState(() {}),
+        );
+      });
+    } catch (e) {
+      print('Error fetching reservations: $e');
+    }
+  }
 
   void _showUnblockModal() {
     showDialog(
@@ -83,19 +82,46 @@ Future<void> fetchReservations() async {
   }
 
   Widget _buildStatusChip(String status) {
-    final color = status == 'Approved'
-        ? Colors.green
-        : status == 'Pending'
-            ? Colors.orange
-            : Colors.red;
+    String trimmedStatus = status.trim();
+    String normalized = trimmedStatus.toLowerCase();
+    print('🔍 Status received: "$status" | trimmed: "$trimmedStatus" | normalized: "$normalized"');
+
+    Color color;
+
+    switch (normalized) {
+      case 'approved':
+        color = Colors.green;
+        break;
+      case 'pending':
+        color = Colors.orange;
+        break;
+      case 'rejected':
+        color = Colors.red;
+        break;
+      case 'overdue':
+        color = Colors.deepPurple;
+        break;
+      case 'returned':
+        color = Colors.blue;
+        break;
+      case 'damaged':
+        color = Colors.brown;
+        break;
+      default:
+        print('⚠️ Unknown status encountered: "$status"');
+        color = Colors.grey;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(status,
-          style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+      child: Text(
+        trimmedStatus,
+        style: TextStyle(color: color, fontWeight: FontWeight.w500),
+      ),
     );
   }
 
@@ -110,6 +136,12 @@ Future<void> fetchReservations() async {
 
   @override
   Widget build(BuildContext context) {
+    if (controller == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6F9),
       body: Padding(
@@ -117,13 +149,9 @@ Future<void> fetchReservations() async {
         child: Column(
           children: [
             ActionButtonRow(
-              isButtonEnabled: controller.isButtonEnabled,
-              onPdfPressed: () {
-                // PDF Logic
-              },
-              onExcelPressed: () {
-                // Excel Logic
-              },
+              isButtonEnabled: controller!.isButtonEnabled,
+              onPdfPressed: () {},
+              onExcelPressed: () {},
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -132,111 +160,84 @@ Future<void> fetchReservations() async {
                   return SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minWidth: constraints.maxWidth),
+                      constraints: BoxConstraints(minWidth: constraints.maxWidth),
                       child: DataTable(
-                        sortColumnIndex: controller.sortColumnIndex,
-                        sortAscending: controller.ascending,
+                        sortColumnIndex: controller!.sortColumnIndex,
+                        sortAscending: controller!.ascending,
                         headingRowColor: MaterialStateColor.resolveWith(
                             (_) => const Color(0xFFD4ECEA)),
                         columns: [
                           DataColumn(
                             label: Checkbox(
-                              value: controller.isAllSelected,
-                              onChanged: (value) => controller.toggleSelectAll(
-                                  value, () => setState(() {})),
+                              value: controller!.isAllSelected,
+                              onChanged: (value) =>
+                                  controller!.toggleSelectAll(value, () => setState(() {})),
                             ),
                           ),
                           DataColumn(
                             label: _buildSortableColumnLabel('Reservation ID'),
-                            onSort: (i, asc) => controller.sort(
-                                (d) => d['reservationId']!,
-                                i,
-                                asc,
-                                () => setState(() {})),
+                            onSort: (i, asc) => controller!.sort(
+                                (d) => d['reservationId']!, i, asc, () => setState(() {})),
                           ),
                           DataColumn(
                             label: _buildSortableColumnLabel('User Name'),
-                            onSort: (i, asc) => controller.sort(
-                                (d) => d['userName']!,
-                                i,
-                                asc,
-                                () => setState(() {})),
+                            onSort: (i, asc) => controller!.sort(
+                                (d) => d['userName']!, i, asc, () => setState(() {})),
                           ),
                           DataColumn(
                             label: _buildSortableColumnLabel('Book Title'),
-                            onSort: (i, asc) => controller.sort(
-                                (d) => d['bookTitle']!,
-                                i,
-                                asc,
-                                () => setState(() {})),
+                            onSort: (i, asc) => controller!.sort(
+                                (d) => d['bookTitle']!, i, asc, () => setState(() {})),
                           ),
                           DataColumn(
-                            label:
-                                _buildSortableColumnLabel('Reservation Date'),
-                            onSort: (i, asc) => controller.sort(
-                                (d) => d['reservationDate']!,
-                                i,
-                                asc,
-                                () => setState(() {})),
+                            label: _buildSortableColumnLabel('Reservation Date'),
+                            onSort: (i, asc) => controller!.sort(
+                                (d) => d['reservationDate']!, i, asc, () => setState(() {})),
                           ),
                           DataColumn(
                             label: _buildSortableColumnLabel('Status'),
-                            onSort: (i, asc) => controller.sort(
-                                (d) => d['status']!,
-                                i,
-                                asc,
-                                () => setState(() {})),
+                            onSort: (i, asc) => controller!.sort(
+                                (d) => d['status']!, i, asc, () => setState(() {})),
                           ),
                           const DataColumn(
-                            label: Text('Action',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ],
-                        rows: List.generate(controller.currentPageData.length,
-                            (index) {
-                          final reservation = controller.currentPageData[index];
-                          final actualIndex =
-                              controller.currentPage * controller.rowsPerPage +
-                                  index;
+                        rows: List.generate(controller!.currentPageData.length, (index) {
+                          final reservation = controller!.currentPageData[index];
+                          final actualIndex = controller!.currentPage * controller!.rowsPerPage + index;
+
                           return DataRow(
                             color: MaterialStateColor.resolveWith(
-                              (states) => index.isEven
-                                  ? Colors.transparent
-                                  : Colors.grey.shade100,
+                              (states) => index.isEven ? Colors.transparent : Colors.grey.shade100,
                             ),
                             cells: [
                               DataCell(Checkbox(
-                                value: controller.selectedRows[actualIndex],
-                                onChanged: (val) =>
-                                    controller.toggleRowSelection(
-                                        val, index, () => setState(() {})),
+                                value: controller!.selectedRows[actualIndex],
+                                onChanged: (val) => controller!.toggleRowSelection(
+                                    val, index, () => setState(() {})),
                               )),
                               DataCell(Text(reservation['reservationId']!)),
                               DataCell(SizedBox(
                                 width: 150,
-                                child: Text(reservation['userName']!,
-                                    overflow: TextOverflow.ellipsis),
+                                child: Text(reservation['userName']!, overflow: TextOverflow.ellipsis),
                               )),
                               DataCell(Text(reservation['bookTitle']!)),
                               DataCell(Text(reservation['reservationDate']!)),
-                              DataCell(
-                                  _buildStatusChip(reservation['status']!)),
+                              DataCell(_buildStatusChip(reservation['status']!)),
                               DataCell(Row(
                                 children: [
                                   Tooltip(
                                     message: 'View',
                                     child: IconButton(
-                                      icon: const Icon(Icons.remove_red_eye,
-                                          size: 20),
+                                      icon: const Icon(Icons.remove_red_eye, size: 20),
                                       onPressed: () {},
                                     ),
                                   ),
                                   Tooltip(
                                     message: 'Unblock',
                                     child: IconButton(
-                                      icon:
-                                          const Icon(Icons.lock_open, size: 20),
+                                      icon: const Icon(Icons.lock_open, size: 20),
                                       onPressed: _showUnblockModal,
                                     ),
                                   ),
@@ -252,13 +253,13 @@ Future<void> fetchReservations() async {
               ),
             ),
             PaginationWidget(
-              currentPage: controller.currentPage,
-              rowsPerPage: controller.rowsPerPage,
-              totalRows: controller.dataList.length,
-              onFirstPage: controller.paginationController.firstPage,
-              onPreviousPage: controller.paginationController.previousPage,
-              onNextPage: controller.paginationController.nextPage,
-              onLastPage: controller.paginationController.lastPage,
+              currentPage: controller!.currentPage,
+              rowsPerPage: controller!.rowsPerPage,
+              totalRows: controller!.dataList.length,
+              onFirstPage: controller!.paginationController.firstPage,
+              onPreviousPage: controller!.paginationController.previousPage,
+              onNextPage: controller!.paginationController.nextPage,
+              onLastPage: controller!.paginationController.lastPage,
             ),
           ],
         ),

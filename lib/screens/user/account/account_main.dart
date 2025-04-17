@@ -9,6 +9,7 @@ import 'package:book_ease/data/personal_data.dart';
 import 'package:provider/provider.dart';
 import 'package:book_ease/provider/user_data.dart';
 import 'package:book_ease/main.dart';
+import 'package:book_ease/base_url.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -29,7 +30,6 @@ class _AccountScreenState extends State<AccountScreen> {
     'assets/icons/girl-2.png',
     'assets/icons/reading_book.png',
     'assets/icons/student-boy.png',
-    'assets/images/bini.jpg',
   ];
 
   Future<Map<String, dynamic>> _loadPersonalInfo() async {
@@ -41,7 +41,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
     try {
       Response response = await _dio.post(
-        "http://127.0.0.1:5566/stud/add-pic", // Replace with actual API URL
+        '${ApiConfig.baseUrl}/stud/add-pic', // Replace with actual API URL
         data: {
           "user_id": userData.userID,
           "avatar_path": avatarPath,

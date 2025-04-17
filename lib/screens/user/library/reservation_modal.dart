@@ -1,3 +1,4 @@
+import 'package:book_ease/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
@@ -18,7 +19,7 @@ void reserveBook(
 
   try {
     final response = await Dio().post(
-      'http://127.0.0.1:5566/reserve/reserve-book',
+      '${ApiConfig.baseUrl}/reserve/reserve-book',
       data: {
         "book_id": bookId,
         "user_id": userId,

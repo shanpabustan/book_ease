@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:book_ease/screens/auth/login.dart';
 import 'package:dio/dio.dart';
 
+import '../../base_url.dart';
+
 class MultiStepSignUpScreen extends StatefulWidget {
   const MultiStepSignUpScreen({super.key});
 
@@ -121,7 +123,7 @@ void _registerUser() async {
   final Dio dio = Dio();
 
   // 🔥 Use correct API URL (Replace with your actual IP)
-  const String apiUrl = "http://127.0.0.1:5566/stud/register";  
+  final String apiUrl = "${ApiConfig.baseUrl}/stud/register";  
 
   try {
     Response response = await dio.post(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'book_data.dart'; // Book and BorrowedBook models
+import 'package:book_ease/base_url.dart';
 
 class BookProvider with ChangeNotifier {
   List<Book> _books = [];
@@ -13,10 +14,10 @@ class BookProvider with ChangeNotifier {
 
   Future<void> fetchBooks() async {
     _isLoading = true;
-    notifyListeners();
+    notifyListeners(); // Notify listeners to update UI that loading has started
 
     try {
-      final response = await Dio().get('http://127.0.0.1:5566/get-all');
+      final response = await Dio().get('${ApiConfig.baseUrl}/get-all');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
         _books = data.map((json) => Book.fromJson(json)).toList();
@@ -24,22 +25,28 @@ class BookProvider with ChangeNotifier {
     } catch (e) {
       print('Error fetching books: $e');
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      // Make sure to call notifyListeners() after data fetch is done
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _isLoading = false;
+        notifyListeners(); // Notify listeners to stop loading
+      });
     }
   }
 
   Future<void> fetchBorrowedBooks(String userId) async {
     try {
       final response = await Dio().get(
-        'http://127.0.0.1:5566/stud/get-borrowed',
+        '${ApiConfig.baseUrl}/stud/get-borrowed',
         queryParameters: {'user_id': userId},
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
         _borrowedBooks = data.map((json) => BorrowedBook.fromJson(json)).toList();
-        notifyListeners();
+        // Notify listeners to update UI after data fetch
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          notifyListeners();
+        });
       }
     } catch (e) {
       print('Error fetching borrowed books: $e');
